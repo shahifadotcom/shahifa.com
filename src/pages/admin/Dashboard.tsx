@@ -88,7 +88,7 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     try {
       const [productsRes, categoriesRes, ordersRes] = await Promise.all([
-        supabase.from('products').select('*').order('created_at', { ascending: false }),
+        supabase.from('products_catalog').select('*').order('created_at', { ascending: false }),
         supabase.from('categories').select('*'),
         supabase.from('orders').select('*').order('created_at', { ascending: false })
       ]);
@@ -115,7 +115,7 @@ const AdminDashboard = () => {
   const checkLowStock = async () => {
     try {
       const { data, error } = await supabase
-        .from('products')
+        .from('products_catalog')
         .select('id, name, stock_quantity, images')
         .lte('stock_quantity', 5)
         .gt('stock_quantity', 0)

@@ -2893,6 +2893,7 @@ export type Database = {
       products_catalog: {
         Row: {
           allowed_payment_gateways: string[] | null
+          auto_order_enabled: boolean | null
           brand: string | null
           cash_on_delivery_enabled: boolean | null
           category_id: string | null
@@ -2900,13 +2901,18 @@ export type Database = {
           created_at: string | null
           description: string | null
           dimensions: Json | null
+          download_url: string | null
           id: string | null
           images: string[] | null
           in_stock: boolean | null
+          is_digital: boolean | null
           meta_description: string | null
           meta_title: string | null
           name: string | null
+          original_price: number | null
           price: number | null
+          print_on_demand: boolean | null
+          product_type: string | null
           rating: number | null
           review_count: number | null
           shipping_cost: number | null
@@ -2918,10 +2924,12 @@ export type Database = {
           tags: string[] | null
           tax_rate: number | null
           updated_at: string | null
+          virtual_trial_enabled: boolean | null
           weight: number | null
         }
         Insert: {
           allowed_payment_gateways?: string[] | null
+          auto_order_enabled?: boolean | null
           brand?: string | null
           cash_on_delivery_enabled?: boolean | null
           category_id?: string | null
@@ -2929,13 +2937,18 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           dimensions?: Json | null
+          download_url?: string | null
           id?: string | null
           images?: string[] | null
           in_stock?: boolean | null
+          is_digital?: boolean | null
           meta_description?: string | null
           meta_title?: string | null
           name?: string | null
+          original_price?: number | null
           price?: number | null
+          print_on_demand?: boolean | null
+          product_type?: string | null
           rating?: number | null
           review_count?: number | null
           shipping_cost?: number | null
@@ -2947,10 +2960,12 @@ export type Database = {
           tags?: string[] | null
           tax_rate?: number | null
           updated_at?: string | null
+          virtual_trial_enabled?: boolean | null
           weight?: number | null
         }
         Update: {
           allowed_payment_gateways?: string[] | null
+          auto_order_enabled?: boolean | null
           brand?: string | null
           cash_on_delivery_enabled?: boolean | null
           category_id?: string | null
@@ -2958,13 +2973,18 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           dimensions?: Json | null
+          download_url?: string | null
           id?: string | null
           images?: string[] | null
           in_stock?: boolean | null
+          is_digital?: boolean | null
           meta_description?: string | null
           meta_title?: string | null
           name?: string | null
+          original_price?: number | null
           price?: number | null
+          print_on_demand?: boolean | null
+          product_type?: string | null
           rating?: number | null
           review_count?: number | null
           shipping_cost?: number | null
@@ -2976,6 +2996,7 @@ export type Database = {
           tags?: string[] | null
           tax_rate?: number | null
           updated_at?: string | null
+          virtual_trial_enabled?: boolean | null
           weight?: number | null
         }
         Relationships: [

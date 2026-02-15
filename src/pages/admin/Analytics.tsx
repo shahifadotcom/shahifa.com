@@ -37,7 +37,7 @@ const Analytics = () => {
 
       // Fetch products count
       const { data: products, error: productsError } = await supabase
-        .from('products')
+        .from('products_catalog')
         .select('id');
       
       if (productsError) throw productsError;

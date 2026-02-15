@@ -61,7 +61,7 @@ const Products = () => {
   const fetchProducts = async () => {
     try {
       const { data, error } = await supabase
-        .from('products')
+        .from('products_catalog')
         .select('*')
         .order('created_at', { ascending: false });
 

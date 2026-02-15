@@ -150,7 +150,7 @@ export const EnhancedAdminProductForm = ({ isOpen, onClose, categories, onSucces
       if (isOpen && product) {
         // Try to fetch latest product from DB to avoid stale props
         const { data: fresh, error: freshError } = await supabase
-          .from('products')
+          .from('products_catalog')
           .select('*')
           .eq('id', product.id)
           .single();
@@ -244,7 +244,7 @@ export const EnhancedAdminProductForm = ({ isOpen, onClose, categories, onSucces
       // Validate slug uniqueness (only for new products or if slug changed)
       if (!product || product.slug !== formData.slug) {
         const { data: existingProduct } = await supabase
-          .from('products')
+          .from('products_catalog')
           .select('id')
           .eq('slug', formData.slug)
           .single();

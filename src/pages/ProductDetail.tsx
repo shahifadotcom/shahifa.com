@@ -39,7 +39,7 @@ const ProductDetail = () => {
       setLoading(true);
       try {
         const { data, error } = await supabase
-          .from('products')
+          .from('products_catalog')
           .select('*, virtual_trial_enabled, meta_title, meta_description, social_preview_image')
           .eq('slug', slug)
           .maybeSingle();

@@ -5,7 +5,7 @@ import { Product, Category, Order, OrderStatus, PaymentStatus } from '@/lib/type
 export const productService = {
   async getAll() {
     const { data, error } = await supabase
-      .from('products')
+      .from('products_catalog')
       .select(`
         *,
         categories:category_id(name, slug),
@@ -19,7 +19,7 @@ export const productService = {
 
   async getById(id: string) {
     const { data, error } = await supabase
-      .from('products')
+      .from('products_catalog')
       .select(`
         *,
         categories:category_id(name, slug),
@@ -43,7 +43,7 @@ export const productService = {
     if (!category) return [];
 
     const { data, error } = await supabase
-      .from('products')
+      .from('products_catalog')
       .select(`
         *,
         categories:category_id(name, slug),

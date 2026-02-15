@@ -17,7 +17,7 @@ export function useProducts() {
       // Non-admin users get secure catalog view excluding sensitive pricing data
       if (isAdmin) {
         const { data, error } = await supabase
-          .from('products')
+          .from('products_catalog')
           .select(`
             *,
             categories:category_id(name, slug),
@@ -122,7 +122,7 @@ export function useProduct(id: string) {
         // Non-admin users get secure catalog view excluding sensitive pricing data
         if (isAdmin) {
           const { data, error } = await supabase
-            .from('products')
+            .from('products_catalog')
             .select(`
               *,
               categories:category_id(name, slug),

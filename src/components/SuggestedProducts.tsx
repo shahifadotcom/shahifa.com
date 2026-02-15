@@ -134,7 +134,7 @@ export function SuggestedProducts({ currentProductIds = [], categoryId, limit = 
     try {
       setLoading(true);
       let query = supabase
-        .from('products')
+        .from('products_catalog')
         .select('id, name, price, images, in_stock, slug, product_type, description, country_id')
         .eq('in_stock', true)
         .eq('country_id', countryId) // Force country filtering

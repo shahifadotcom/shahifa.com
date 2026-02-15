@@ -21,7 +21,7 @@ export default function Sitemap() {
 
       // Get all active products
       const { data: products } = await supabase
-        .from('products')
+        .from('products_catalog')
         .select('slug, updated_at')
         .eq('in_stock', true);
 
