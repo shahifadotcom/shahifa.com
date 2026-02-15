@@ -42,7 +42,7 @@ export function StorefrontSection({ type, title, limit = 16 }: StorefrontSection
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('products')
+        .from('products_catalog')
         .select('id, name, price, images, in_stock, slug, description, product_type')
         .eq('product_type', type)
         .eq('in_stock', true)

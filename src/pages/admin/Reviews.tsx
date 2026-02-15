@@ -69,7 +69,7 @@ const Reviews = () => {
   const fetchProducts = async () => {
     try {
       const { data, error } = await supabase
-        .from('products')
+        .from('products_catalog')
         .select('id, name')
         .order('name');
 

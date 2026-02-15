@@ -4,7 +4,7 @@ import { Product, Category, CartItem, Order, Customer, Address } from "@/lib/typ
 // Products API
 export const fetchProducts = async (): Promise<Product[]> => {
   const { data, error } = await supabase
-    .from('products')
+    .from('products_catalog')
     .select(`
       *,
       category:categories!products_category_id_fkey(id, name, slug),
@@ -48,7 +48,7 @@ export const fetchProducts = async (): Promise<Product[]> => {
 
 export const fetchProductsByCategory = async (categorySlug: string): Promise<Product[]> => {
   const { data, error } = await supabase
-    .from('products')
+    .from('products_catalog')
     .select(`
       *,
       category:categories!products_category_id_fkey(id, name, slug),
