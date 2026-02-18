@@ -6,16 +6,43 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Allowed event names to prevent arbitrary event injection
+const ALLOWED_EVENT_NAMES = new Set([
+  'PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout',
+  'Purchase', 'Search', 'CompleteRegistration', 'Lead',
+]);
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Require authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+
+    // Verify user identity
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabase = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
 
     const {
       event_name,
@@ -26,13 +53,20 @@ serve(async (req) => {
       session_id,
     } = await req.json();
 
-    // Get user info from auth header if available
-    const authHeader = req.headers.get('Authorization');
-    let userId = null;
-    if (authHeader) {
-      const token = authHeader.replace('Bearer ', '');
-      const { data: { user } } = await supabase.auth.getUser(token);
-      userId = user?.id;
+    // Validate event_name against allowlist
+    if (!event_name || !ALLOWED_EVENT_NAMES.has(event_name)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid event_name' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate value if provided
+    if (value !== undefined && (typeof value !== 'number' || value < 0)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid value' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Extract client info
@@ -41,12 +75,12 @@ serve(async (req) => {
                       req.headers.get('x-real-ip') || '';
     const referrer = req.headers.get('referer') || '';
 
-    // Store tracking event
+    // Store tracking event scoped to the authenticated user
     const { data: trackingEvent, error: trackError } = await supabase
       .from('tracking_events')
       .insert({
         event_name,
-        user_id: userId,
+        user_id: user.id,
         session_id,
         event_data,
         product_id,
@@ -68,9 +102,8 @@ serve(async (req) => {
     const { error: serverError } = await supabase.functions.invoke(
       'server-side-tracking',
       {
-        body: {
-          event: trackingEvent,
-        },
+        body: { event: trackingEvent },
+        headers: { Authorization: authHeader },
       }
     );
 

@@ -13,10 +13,31 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Require authentication - this function is called server-to-server from track-event
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+
+    // Verify user identity
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabase = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
 
     const { event } = await req.json();
 
@@ -45,7 +66,6 @@ serve(async (req) => {
 
         results.push({ platform: platform.platform, success: true, result });
 
-        // Log server-side event
         await supabase.from('server_side_events').insert({
           platform: platform.platform,
           event_type: event.event_name,
@@ -60,7 +80,6 @@ serve(async (req) => {
         console.error(`Error sending to ${platform.platform}:`, error);
         results.push({ platform: platform.platform, success: false, error: error.message });
 
-        // Log failed event
         await supabase.from('server_side_events').insert({
           platform: platform.platform,
           event_type: event.event_name,
@@ -72,7 +91,6 @@ serve(async (req) => {
       }
     }
 
-    // Update tracking event with platforms sent
     await supabase
       .from('tracking_events')
       .update({
@@ -159,7 +177,6 @@ async function sendToTikTok(platform: any, event: any) {
 }
 
 async function sendToGoogleAds(platform: any, event: any) {
-  // Google Ads Enhanced Conversions
   const url = `https://googleads.googleapis.com/v14/customers/${platform.ad_account_id}/conversionUploads:uploadClickConversions`;
   
   const conversionData = {
