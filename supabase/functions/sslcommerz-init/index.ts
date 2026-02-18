@@ -12,17 +12,77 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    );
+    // Require authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+
+    // Verify JWT and get user identity
+    const anonClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const userId = claimsData.claims.sub;
 
     const { orderId, amount, customerInfo } = await req.json();
+
+    if (!orderId || typeof amount !== 'number') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing required fields: orderId, amount' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(orderId)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid orderId format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Use service role for privileged DB operations
+    const supabaseAdmin = createClient(
+      supabaseUrl,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { persistSession: false } }
+    );
+
+    // Verify the order belongs to the authenticated user
+    const { data: order, error: orderError } = await supabaseAdmin
+      .from('orders')
+      .select('id, customer_id, total, payment_status')
+      .eq('id', orderId)
+      .eq('customer_id', userId)
+      .maybeSingle();
+
+    if (orderError || !order) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Order not found or access denied' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     console.log('Initiating SSLCommerz payment for order:', orderId);
 
     // Get SSLCommerz config
-    const { data: config, error: configError } = await supabaseClient
+    const { data: config, error: configError } = await supabaseAdmin
       .from('sslcommerz_config')
       .select('*')
       .eq('is_active', true)
@@ -32,23 +92,12 @@ serve(async (req) => {
       throw new Error('SSLCommerz is not configured or inactive');
     }
 
-    // Get order details
-    const { data: order, error: orderError } = await supabaseClient
-      .from('orders')
-      .select('*')
-      .eq('id', orderId)
-      .single();
-
-    if (orderError || !order) {
-      throw new Error('Order not found');
-    }
-
-    const baseUrl = config.is_sandbox 
+    const baseUrl = config.is_sandbox
       ? 'https://sandbox.sslcommerz.com'
       : 'https://securepay.sslcommerz.com';
 
     const transactionId = `${orderId}-${Date.now()}`;
-    
+
     // Prepare SSLCommerz request
     const sslcommerzData = {
       store_id: config.store_id,
@@ -56,15 +105,15 @@ serve(async (req) => {
       total_amount: amount.toString(),
       currency: 'BDT',
       tran_id: transactionId,
-      success_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/sslcommerz-callback?type=success`,
-      fail_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/sslcommerz-callback?type=fail`,
-      cancel_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/sslcommerz-callback?type=cancel`,
-      ipn_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/sslcommerz-ipn`,
-      cus_name: customerInfo.name || 'Customer',
-      cus_email: customerInfo.email || 'customer@example.com',
-      cus_phone: customerInfo.phone || '01700000000',
-      cus_add1: customerInfo.address || 'Dhaka',
-      cus_city: customerInfo.city || 'Dhaka',
+      success_url: `${supabaseUrl}/functions/v1/sslcommerz-callback?type=success`,
+      fail_url: `${supabaseUrl}/functions/v1/sslcommerz-callback?type=fail`,
+      cancel_url: `${supabaseUrl}/functions/v1/sslcommerz-callback?type=cancel`,
+      ipn_url: `${supabaseUrl}/functions/v1/sslcommerz-ipn`,
+      cus_name: customerInfo?.name || 'Customer',
+      cus_email: customerInfo?.email || 'customer@example.com',
+      cus_phone: customerInfo?.phone || '01700000000',
+      cus_add1: customerInfo?.address || 'Dhaka',
+      cus_city: customerInfo?.city || 'Dhaka',
       cus_country: 'Bangladesh',
       shipping_method: 'NO',
       product_name: `Order #${orderId.substring(0, 8)}`,
@@ -84,11 +133,11 @@ serve(async (req) => {
     });
 
     const result = await response.json();
-    console.log('SSLCommerz response:', result);
+    console.log('SSLCommerz response status:', result.status);
 
     if (result.status === 'SUCCESS') {
       // Store transaction record
-      const { error: txError } = await supabaseClient
+      const { error: txError } = await supabaseAdmin
         .from('sslcommerz_transactions')
         .insert({
           order_id: orderId,
@@ -118,13 +167,13 @@ serve(async (req) => {
   } catch (error) {
     console.error('SSLCommerz init error:', error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message 
+      JSON.stringify({
+        success: false,
+        error: 'Payment initialization failed',
       }),
-      { 
+      {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
   }
