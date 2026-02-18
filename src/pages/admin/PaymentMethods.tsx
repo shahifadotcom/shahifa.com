@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Search, Edit, Trash2, CreditCard, Shield } from 'lucide-react';
+import { Plus, Edit, Trash2, CreditCard, Shield, AlertTriangle } from 'lucide-react';
 import AdminLayout from '@/layouts/AdminLayout';
 import {
   Dialog,
@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface PaymentMethod {
   id: string;
@@ -43,9 +44,10 @@ const PaymentMethods = () => {
 
   const fetchPaymentMethods = async () => {
     try {
+      // Only fetch non-sensitive display fields — never fetch encrypted_card_data
       const { data, error } = await supabase
         .from('saved_payment_methods')
-        .select('*')
+        .select('id, payment_method_name, card_last_four, card_brand, expiry_month, expiry_year, is_default, is_active, created_at')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -64,20 +66,12 @@ const PaymentMethods = () => {
 
   const handleSavePaymentMethod = async (methodData: any) => {
     try {
-      // Note: In a real application, card data should be encrypted before storing
-      // This is a simplified example for demonstration
-      const encryptedData = btoa(JSON.stringify({
-        cardNumber: methodData.cardNumber,
-        cvv: methodData.cvv,
-        expiryMonth: methodData.expiryMonth,
-        expiryYear: methodData.expiryYear,
-        cardholderName: methodData.cardholderName
-      }));
-
+      // SECURITY: Only store card reference metadata — never store full card numbers or CVV
       const paymentMethodData = {
         payment_method_name: methodData.payment_method_name,
-        encrypted_card_data: encryptedData,
-        card_last_four: methodData.cardNumber.slice(-4),
+        // Store a placeholder — actual card processing must use a payment gateway tokenization
+        encrypted_card_data: '[tokenized-via-payment-gateway]',
+        card_last_four: methodData.cardLastFour,
         card_brand: methodData.card_brand,
         expiry_month: parseInt(methodData.expiryMonth),
         expiry_year: parseInt(methodData.expiryYear),
@@ -90,9 +84,9 @@ const PaymentMethods = () => {
           .from('saved_payment_methods')
           .update(paymentMethodData)
           .eq('id', editingMethod.id);
-        
+
         if (error) throw error;
-        
+
         toast({
           title: "Success",
           description: "Payment method updated successfully."
@@ -101,15 +95,15 @@ const PaymentMethods = () => {
         const { error } = await supabase
           .from('saved_payment_methods')
           .insert(paymentMethodData);
-        
+
         if (error) throw error;
-        
+
         toast({
           title: "Success",
-          description: "Payment method added successfully."
+          description: "Payment method reference added successfully."
         });
       }
-      
+
       fetchPaymentMethods();
       setShowForm(false);
       setEditingMethod(null);
@@ -154,13 +148,11 @@ const PaymentMethods = () => {
 
   const setAsDefault = async (methodId: string) => {
     try {
-      // First, remove default from all other methods
       await supabase
         .from('saved_payment_methods')
         .update({ is_default: false })
         .neq('id', methodId);
 
-      // Then set this one as default
       const { error } = await supabase
         .from('saved_payment_methods')
         .update({ is_default: true })
@@ -187,23 +179,30 @@ const PaymentMethods = () => {
   const PaymentMethodForm = ({ method, onSave, onClose }: any) => {
     const [formData, setFormData] = useState({
       payment_method_name: method?.payment_method_name || '',
-      cardNumber: '',
-      cvv: '',
-      expiryMonth: '',
-      expiryYear: '',
-      cardholderName: '',
+      cardLastFour: method?.card_last_four || '',
+      expiryMonth: method?.expiry_month?.toString() || '',
+      expiryYear: method?.expiry_year?.toString() || '',
       card_brand: method?.card_brand || 'visa',
       is_default: method?.is_default || false
     });
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      
-      // Basic validation
-      if (formData.cardNumber.length < 13 || formData.cardNumber.length > 19) {
+
+      // Validate last four digits only
+      if (!/^\d{4}$/.test(formData.cardLastFour)) {
         toast({
           title: "Error",
-          description: "Please enter a valid card number.",
+          description: "Please enter the last 4 digits of the card.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!formData.expiryMonth || !formData.expiryYear) {
+        toast({
+          title: "Error",
+          description: "Please select an expiry date.",
           variant: "destructive"
         });
         return;
@@ -218,57 +217,51 @@ const PaymentMethods = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CreditCard className="h-5 w-5" />
-              {method ? 'Edit Payment Method' : 'Add Payment Method'}
+              {method ? 'Edit Payment Method' : 'Add Payment Method Reference'}
             </DialogTitle>
             <DialogDescription>
-              <div className="flex items-center gap-2 text-orange-600">
-                <Shield className="h-4 w-4" />
-                All card data is encrypted before storage
-              </div>
+              Store a reference to your payment method. Full card data should be managed through your payment gateway.
             </DialogDescription>
           </DialogHeader>
-          
+
+          <Alert>
+            <Shield className="h-4 w-4" />
+            <AlertDescription>
+              For security, only the last 4 digits are stored. Full card numbers and CVV are never saved in the database.
+            </AlertDescription>
+          </Alert>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="payment_method_name">Payment Method Name</Label>
               <Input
                 id="payment_method_name"
                 value={formData.payment_method_name}
-                onChange={(e) => setFormData({ ...formData, payment_method_name: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, payment_method_name: e.target.value.substring(0, 100) })}
                 placeholder="e.g., Business Visa Card"
                 required
               />
             </div>
 
             <div>
-              <Label htmlFor="cardholderName">Cardholder Name</Label>
+              <Label htmlFor="cardLastFour">Last 4 Digits</Label>
               <Input
-                id="cardholderName"
-                value={formData.cardholderName}
-                onChange={(e) => setFormData({ ...formData, cardholderName: e.target.value })}
-                placeholder="John Doe"
-                required
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="cardNumber">Card Number</Label>
-              <Input
-                id="cardNumber"
-                value={formData.cardNumber}
+                id="cardLastFour"
+                value={formData.cardLastFour}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '');
-                  setFormData({ ...formData, cardNumber: value });
+                  const value = e.target.value.replace(/\D/g, '').substring(0, 4);
+                  setFormData({ ...formData, cardLastFour: value });
                 }}
-                placeholder="1234567890123456"
-                maxLength={19}
+                placeholder="4242"
+                maxLength={4}
                 required
               />
+              <p className="text-xs text-muted-foreground mt-1">Only the last 4 digits for identification purposes</p>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="expiryMonth">Month</Label>
+                <Label htmlFor="expiryMonth">Expiry Month</Label>
                 <Select value={formData.expiryMonth} onValueChange={(value) => setFormData({ ...formData, expiryMonth: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="MM" />
@@ -282,9 +275,9 @@ const PaymentMethods = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div>
-                <Label htmlFor="expiryYear">Year</Label>
+                <Label htmlFor="expiryYear">Expiry Year</Label>
                 <Select value={formData.expiryYear} onValueChange={(value) => setFormData({ ...formData, expiryYear: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="YYYY" />
@@ -297,22 +290,6 @@ const PaymentMethods = () => {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="cvv">CVV</Label>
-                <Input
-                  id="cvv"
-                  type="password"
-                  value={formData.cvv}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, '');
-                    setFormData({ ...formData, cvv: value });
-                  }}
-                  placeholder="123"
-                  maxLength={4}
-                  required
-                />
               </div>
             </div>
 
@@ -373,7 +350,7 @@ const PaymentMethods = () => {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold">Payment Methods</h1>
-            <p className="text-muted-foreground">Manage saved payment methods for dropshipping automation</p>
+            <p className="text-muted-foreground">Manage saved payment method references for dropshipping automation</p>
           </div>
           <Button onClick={() => setShowForm(true)}>
             <Plus className="h-4 w-4 mr-2" />
@@ -381,12 +358,20 @@ const PaymentMethods = () => {
           </Button>
         </div>
 
+        <Alert className="mb-6">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Security Notice:</strong> This section stores only card reference metadata (last 4 digits, brand, expiry). 
+            Full card processing must be handled through a PCI-compliant payment gateway such as Stripe.
+          </AlertDescription>
+        </Alert>
+
         <div className="grid gap-4">
           {paymentMethods.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
                 <CreditCard className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">No payment methods saved. Add a payment method to enable automatic order processing.</p>
+                <p className="text-muted-foreground">No payment methods saved. Add a payment method reference to enable automatic order processing.</p>
               </CardContent>
             </Card>
           ) : (
@@ -413,16 +398,16 @@ const PaymentMethods = () => {
                     </div>
                     <div className="flex gap-2">
                       {!method.is_default && (
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => setAsDefault(method.id)}
                         >
                           Set Default
                         </Button>
                       )}
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => {
                           setEditingMethod(method);
@@ -431,8 +416,8 @@ const PaymentMethods = () => {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => handleDeletePaymentMethod(method.id)}
                       >
@@ -465,7 +450,7 @@ const PaymentMethods = () => {
             ))
           )}
         </div>
-        
+
         {showForm && (
           <PaymentMethodForm
             method={editingMethod}
