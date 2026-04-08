@@ -26,20 +26,17 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
     // Verify user identity via JWT
-    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
-
+    const userClient = createClient(supabaseUrl, supabaseAnonKey);
     const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await userClient.auth.getUser(token);
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    const authenticatedUserId = claimsData.claims.sub;
+    const authenticatedUserId = user.id;
 
     const { orderId, customerEmail, customerName } = await req.json();
 
