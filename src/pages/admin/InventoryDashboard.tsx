@@ -48,7 +48,7 @@ const InventoryDashboard = () => {
       try {
         setLoading(true);
         const { data: prods, error: pErr } = await supabase
-          .from('products_catalog')
+          .from('products')
           .select('id, name, sku, price, cost_price, stock_quantity, ads_cost, delivery_charge, return_cost, packaging_cost')
           .order('name', { ascending: true });
         if (pErr) throw pErr;
