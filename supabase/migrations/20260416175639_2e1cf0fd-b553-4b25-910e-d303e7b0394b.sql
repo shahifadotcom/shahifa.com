@@ -1,0 +1,5 @@
+ALTER TABLE public.products
+  ADD COLUMN IF NOT EXISTS ads_cost numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS delivery_charge numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS return_cost numeric NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS packaging_cost numeric NOT NULL DEFAULT 0;

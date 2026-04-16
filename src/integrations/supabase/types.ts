@@ -1577,6 +1577,7 @@ export type Database = {
       }
       products: {
         Row: {
+          ads_cost: number
           allowed_payment_gateways: string[] | null
           auto_order_enabled: boolean | null
           brand: string | null
@@ -1585,6 +1586,7 @@ export type Database = {
           cost_price: number | null
           country_id: string | null
           created_at: string | null
+          delivery_charge: number
           description: string
           dimensions: Json | null
           download_url: string | null
@@ -1596,10 +1598,12 @@ export type Database = {
           meta_title: string | null
           name: string
           original_price: number | null
+          packaging_cost: number
           price: number
           print_on_demand: boolean | null
           product_type: string | null
           rating: number | null
+          return_cost: number
           review_count: number | null
           shipping_cost: number | null
           sku: string
@@ -1615,6 +1619,7 @@ export type Database = {
           weight: number | null
         }
         Insert: {
+          ads_cost?: number
           allowed_payment_gateways?: string[] | null
           auto_order_enabled?: boolean | null
           brand?: string | null
@@ -1623,6 +1628,7 @@ export type Database = {
           cost_price?: number | null
           country_id?: string | null
           created_at?: string | null
+          delivery_charge?: number
           description: string
           dimensions?: Json | null
           download_url?: string | null
@@ -1634,10 +1640,12 @@ export type Database = {
           meta_title?: string | null
           name: string
           original_price?: number | null
+          packaging_cost?: number
           price: number
           print_on_demand?: boolean | null
           product_type?: string | null
           rating?: number | null
+          return_cost?: number
           review_count?: number | null
           shipping_cost?: number | null
           sku: string
@@ -1653,6 +1661,7 @@ export type Database = {
           weight?: number | null
         }
         Update: {
+          ads_cost?: number
           allowed_payment_gateways?: string[] | null
           auto_order_enabled?: boolean | null
           brand?: string | null
@@ -1661,6 +1670,7 @@ export type Database = {
           cost_price?: number | null
           country_id?: string | null
           created_at?: string | null
+          delivery_charge?: number
           description?: string
           dimensions?: Json | null
           download_url?: string | null
@@ -1672,10 +1682,12 @@ export type Database = {
           meta_title?: string | null
           name?: string
           original_price?: number | null
+          packaging_cost?: number
           price?: number
           print_on_demand?: boolean | null
           product_type?: string | null
           rating?: number | null
+          return_cost?: number
           review_count?: number | null
           shipping_cost?: number | null
           sku?: string
