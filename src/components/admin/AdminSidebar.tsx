@@ -41,6 +41,7 @@ const AdminSidebar = () => {
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
     { icon: Package, label: "Products", href: "/admin/products" },
+    { icon: BarChart3, label: "Inventory Dashboard", href: "/admin/inventory-dashboard" },
     { icon: ShoppingCart, label: "Orders", href: "/admin/orders" },
     { icon: Star, label: "Reviews", href: "/admin/reviews" },
     { icon: Users, label: "Customers", href: "/admin/customers" },

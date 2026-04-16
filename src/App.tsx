@@ -20,6 +20,7 @@ import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
+import InventoryDashboard from "./pages/admin/InventoryDashboard";
 import AdminOrders from "./pages/admin/Orders";
 import Categories from "./pages/admin/Categories";
 import Settings from "./pages/admin/Settings";
@@ -116,6 +117,7 @@ const App = () => {
               {/* Admin Routes */}
               <Route path="/admin" element={<Dashboard />} />
               <Route path="/admin/products" element={<Products />} />
+              <Route path="/admin/inventory-dashboard" element={<InventoryDashboard />} />
               <Route path="/admin/orders" element={<AdminOrders />} />
               <Route path="/admin/categories" element={<Categories />} />
               <Route path="/admin/customers" element={<Customers />} />
