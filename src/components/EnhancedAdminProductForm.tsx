@@ -69,6 +69,10 @@ export const EnhancedAdminProductForm = ({ isOpen, onClose, categories, onSucces
     stock_quantity: '',
     sku: '',
     weight: '',
+    ads_cost: '',
+    delivery_charge: '',
+    return_cost: '',
+    packaging_cost: '',
     dimensions: {
       length: '',
       width: '',
@@ -183,6 +187,10 @@ export const EnhancedAdminProductForm = ({ isOpen, onClose, categories, onSucces
           stock_quantity: p.stock_quantity?.toString() || '',
           sku: p.sku || '',
           weight: p.weight?.toString() || '',
+          ads_cost: p.ads_cost?.toString() || '',
+          delivery_charge: p.delivery_charge?.toString() || '',
+          return_cost: p.return_cost?.toString() || '',
+          packaging_cost: p.packaging_cost?.toString() || '',
           dimensions: {
             length: p.dimensions?.length?.toString() || '',
             width: p.dimensions?.width?.toString() || '',
@@ -201,6 +209,7 @@ export const EnhancedAdminProductForm = ({ isOpen, onClose, categories, onSucces
           allowed_payment_gateways: [] as string[], cash_on_delivery_enabled: false,
           virtual_trial_enabled: false, is_digital: false, print_on_demand: false, product_type: 'physical', download_url: '',
           brand: '', tags: '', stock_quantity: '', sku: '', weight: '',
+          ads_cost: '', delivery_charge: '', return_cost: '', packaging_cost: '',
           dimensions: { length: '', width: '', height: '' },
           meta_title: '', meta_description: '', social_preview_image: ''
         });
@@ -271,6 +280,10 @@ export const EnhancedAdminProductForm = ({ isOpen, onClose, categories, onSucces
         sku: formData.sku,
         tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
         weight: formData.weight ? parseFloat(formData.weight) : null,
+        ads_cost: formData.ads_cost ? parseFloat(formData.ads_cost) : 0,
+        delivery_charge: formData.delivery_charge ? parseFloat(formData.delivery_charge) : 0,
+        return_cost: formData.return_cost ? parseFloat(formData.return_cost) : 0,
+        packaging_cost: formData.packaging_cost ? parseFloat(formData.packaging_cost) : 0,
         allowed_payment_gateways: formData.allowed_payment_gateways,
         cash_on_delivery_enabled: formData.cash_on_delivery_enabled,
         virtual_trial_enabled: formData.virtual_trial_enabled,
@@ -323,6 +336,7 @@ export const EnhancedAdminProductForm = ({ isOpen, onClose, categories, onSucces
         allowed_payment_gateways: [] as string[], cash_on_delivery_enabled: false,
         virtual_trial_enabled: false, is_digital: false, print_on_demand: false, product_type: 'physical', download_url: '',
         brand: '', tags: '', stock_quantity: '', sku: '', weight: '',
+        ads_cost: '', delivery_charge: '', return_cost: '', packaging_cost: '',
         dimensions: { length: '', width: '', height: '' },
         meta_title: '', meta_description: '', social_preview_image: ''
       });
@@ -894,6 +908,53 @@ export const EnhancedAdminProductForm = ({ isOpen, onClose, categories, onSucces
                       onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
                       placeholder="0.00"
                     />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="ads_cost">Ads Cost (per unit)</Label>
+                      <Input
+                        id="ads_cost"
+                        type="number"
+                        step="0.01"
+                        value={formData.ads_cost}
+                        onChange={(e) => setFormData({ ...formData, ads_cost: e.target.value })}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="delivery_charge">Delivery Charge (per unit)</Label>
+                      <Input
+                        id="delivery_charge"
+                        type="number"
+                        step="0.01"
+                        value={formData.delivery_charge}
+                        onChange={(e) => setFormData({ ...formData, delivery_charge: e.target.value })}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="return_cost">Return Cost (per unit)</Label>
+                      <Input
+                        id="return_cost"
+                        type="number"
+                        step="0.01"
+                        value={formData.return_cost}
+                        onChange={(e) => setFormData({ ...formData, return_cost: e.target.value })}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="packaging_cost">Packaging Cost (per unit)</Label>
+                      <Input
+                        id="packaging_cost"
+                        type="number"
+                        step="0.01"
+                        value={formData.packaging_cost}
+                        onChange={(e) => setFormData({ ...formData, packaging_cost: e.target.value })}
+                        placeholder="0.00"
+                      />
+                    </div>
                   </div>
 
                   <div>
