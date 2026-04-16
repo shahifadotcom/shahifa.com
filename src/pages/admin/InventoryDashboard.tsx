@@ -29,6 +29,8 @@ interface SalesAgg {
   revenue: number;
 }
 
+type SalesFilter = 'paid' | 'fulfilled' | 'all';
+
 const fmt = (n: number) =>
   new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(
     Number.isFinite(n) ? n : 0
