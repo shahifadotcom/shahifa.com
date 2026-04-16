@@ -186,6 +186,18 @@ const InventoryDashboard = () => {
                 />
               </div>
             </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-muted-foreground">Count sales from:</span>
+              <Button variant={salesFilter === 'paid' ? 'default' : 'outline'} size="sm" onClick={() => setSalesFilter('paid')}>
+                Paid orders
+              </Button>
+              <Button variant={salesFilter === 'fulfilled' ? 'default' : 'outline'} size="sm" onClick={() => setSalesFilter('fulfilled')}>
+                Shipped/Delivered
+              </Button>
+              <Button variant={salesFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setSalesFilter('all')}>
+                All (excl. cancelled)
+              </Button>
+            </div>
             <ScrollArea className="h-48 rounded-md border p-3">
               <div className="space-y-2">
                 {filteredProducts.map((p) => (
