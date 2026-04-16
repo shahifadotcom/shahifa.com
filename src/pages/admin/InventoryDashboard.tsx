@@ -44,6 +44,7 @@ const InventoryDashboard = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [allMode, setAllMode] = useState(true);
   const [search, setSearch] = useState('');
+  const [salesFilter, setSalesFilter] = useState<SalesFilter>('paid');
 
   useEffect(() => {
     const load = async () => {
