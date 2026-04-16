@@ -29,6 +29,8 @@ interface SalesAgg {
   revenue: number;
 }
 
+type SalesFilter = 'paid' | 'fulfilled' | 'all';
+
 const fmt = (n: number) =>
   new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(
     Number.isFinite(n) ? n : 0
@@ -42,6 +44,9 @@ const InventoryDashboard = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [allMode, setAllMode] = useState(true);
   const [search, setSearch] = useState('');
+  const [salesFilter, setSalesFilter] = useState<SalesFilter>('paid');
+
+  const [rawItems, setRawItems] = useState<any[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -55,20 +60,11 @@ const InventoryDashboard = () => {
 
         const { data: items, error: iErr } = await supabase
           .from('order_items')
-          .select('product_id, quantity, price');
+          .select('product_id, quantity, price, orders(status, payment_status)');
         if (iErr) throw iErr;
 
-        const agg: Record<string, SalesAgg> = {};
-        (items || []).forEach((it: any) => {
-          if (!it.product_id) return;
-          const cur = agg[it.product_id] || { product_id: it.product_id, units_sold: 0, revenue: 0 };
-          cur.units_sold += Number(it.quantity) || 0;
-          cur.revenue += (Number(it.quantity) || 0) * (Number(it.price) || 0);
-          agg[it.product_id] = cur;
-        });
-
         setProducts((prods || []) as ProductRow[]);
-        setSales(agg);
+        setRawItems(items || []);
       } catch (e: any) {
         toast({ title: 'Failed to load inventory', description: e.message, variant: 'destructive' });
       } finally {
@@ -77,6 +73,26 @@ const InventoryDashboard = () => {
     };
     load();
   }, [toast]);
+
+  // Re-aggregate sales when filter changes
+  useEffect(() => {
+    const agg: Record<string, SalesAgg> = {};
+    rawItems.forEach((it: any) => {
+      if (!it.product_id) return;
+      const status = it.orders?.status;
+      const payStatus = it.orders?.payment_status;
+      if (status === 'cancelled' || status === 'refunded') return;
+      if (salesFilter === 'paid' && payStatus !== 'paid') return;
+      if (salesFilter === 'fulfilled' && !['delivered', 'shipped'].includes(status)) return;
+      const cur = agg[it.product_id] || { product_id: it.product_id, units_sold: 0, revenue: 0 };
+      const qty = Number(it.quantity) || 0;
+      const price = Number(it.price) || 0;
+      cur.units_sold += qty;
+      cur.revenue += qty * price;
+      agg[it.product_id] = cur;
+    });
+    setSales(agg);
+  }, [rawItems, salesFilter]);
 
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -169,6 +185,18 @@ const InventoryDashboard = () => {
                   className="pl-10"
                 />
               </div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-muted-foreground">Count sales from:</span>
+              <Button variant={salesFilter === 'paid' ? 'default' : 'outline'} size="sm" onClick={() => setSalesFilter('paid')}>
+                Paid orders
+              </Button>
+              <Button variant={salesFilter === 'fulfilled' ? 'default' : 'outline'} size="sm" onClick={() => setSalesFilter('fulfilled')}>
+                Shipped/Delivered
+              </Button>
+              <Button variant={salesFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setSalesFilter('all')}>
+                All (excl. cancelled)
+              </Button>
             </div>
             <ScrollArea className="h-48 rounded-md border p-3">
               <div className="space-y-2">
