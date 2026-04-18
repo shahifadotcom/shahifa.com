@@ -294,6 +294,7 @@ const InventoryDashboard = () => {
                 <thead className="border-b">
                   <tr className="text-left">
                     <th className="py-2 pr-3">Product</th>
+                    <th className="py-2 px-3 text-right">Price</th>
                     <th className="py-2 px-3 text-right">Stock</th>
                     <th className="py-2 px-3 text-right">Cost</th>
                     <th className="py-2 px-3 text-right">Ads</th>
@@ -322,6 +323,7 @@ const InventoryDashboard = () => {
                           <div className="font-medium">{p.name}</div>
                           <div className="text-xs text-muted-foreground">{p.sku}</div>
                         </td>
+                        <td className="py-2 px-3 text-right font-medium">{fmt(p.price || 0)}</td>
                         <td className="py-2 px-3 text-right">
                           {(p.stock_quantity || 0) <= 5 ? (
                             <Badge variant="destructive">{p.stock_quantity || 0}</Badge>
@@ -344,7 +346,7 @@ const InventoryDashboard = () => {
                   })}
                   {activeProducts.length === 0 && (
                     <tr>
-                      <td colSpan={10} className="py-8 text-center text-muted-foreground">
+                      <td colSpan={11} className="py-8 text-center text-muted-foreground">
                         No products selected
                       </td>
                     </tr>
