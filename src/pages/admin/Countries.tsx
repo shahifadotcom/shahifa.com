@@ -337,6 +337,37 @@ const Countries = () => {
             </Dialog>
           </div>
 
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Country Selection Mode</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div className="space-y-1">
+                  <Label htmlFor="selection_enabled" className="text-base font-medium">
+                    Ask visitors to choose their country
+                  </Label>
+                  <p className="text-sm text-muted-foreground max-w-2xl">
+                    {selectionEnabled
+                      ? 'Enabled: Visitors will see a country selection modal on their first visit.'
+                      : "Disabled: The store will automatically detect the visitor's country using IP/geolocation."}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="selection_enabled"
+                    checked={selectionEnabled}
+                    disabled={savingSetting}
+                    onCheckedChange={handleToggleSelection}
+                  />
+                  <span className="text-sm font-medium">
+                    {selectionEnabled ? 'On' : 'Off'}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Countries List</CardTitle>
