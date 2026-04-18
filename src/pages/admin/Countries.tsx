@@ -63,23 +63,27 @@ const Countries = () => {
   const handleToggleSelection = async (checked: boolean) => {
     setSavingSetting(true);
     try {
-      let result;
-      if (settingsRowId) {
-        result = await supabase
-          .from('store_settings')
-          .update({ country_selection_enabled: checked })
-          .eq('id', settingsRowId);
-      } else {
-        result = await supabase
+      // Update ALL store_settings rows (table may contain duplicates) so the
+      // setting is consistent regardless of which row the storefront reads.
+      const { error: updateError, data: updated } = await supabase
+        .from('store_settings')
+        .update({ country_selection_enabled: checked })
+        .not('id', 'is', null)
+        .select('id');
+
+      if (updateError) throw updateError;
+
+      // If no rows existed, insert one
+      if (!updated || updated.length === 0) {
+        const { error: insertError, data: inserted } = await supabase
           .from('store_settings')
           .insert({ country_selection_enabled: checked } as any)
           .select('id')
           .single();
-        if (!result.error && (result as any).data?.id) {
-          setSettingsRowId((result as any).data.id);
-        }
+        if (insertError) throw insertError;
+        if (inserted?.id) setSettingsRowId(inserted.id);
       }
-      if (result.error) throw result.error;
+
       setSelectionEnabled(checked);
       toast({
         title: 'Setting updated',
@@ -91,7 +95,7 @@ const Countries = () => {
       console.error('Error updating selection setting:', err);
       toast({
         title: 'Error',
-        description: 'Failed to update country selection setting',
+        description: err?.message || 'Failed to update country selection setting',
         variant: 'destructive',
       });
     } finally {
