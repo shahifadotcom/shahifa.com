@@ -74,8 +74,14 @@ const InventoryDashboard = () => {
     load();
   }, [toast]);
 
-  // Re-aggregate sales when filter changes
+  // Re-aggregate sales when filter or products change
+  // Revenue = units_sold * current product price (matches user mental model)
   useEffect(() => {
+    const priceMap: Record<string, number> = {};
+    products.forEach((p) => {
+      priceMap[p.id] = Number(p.price) || 0;
+    });
+
     const agg: Record<string, SalesAgg> = {};
     rawItems.forEach((it: any) => {
       if (!it.product_id) return;
@@ -86,13 +92,12 @@ const InventoryDashboard = () => {
       if (salesFilter === 'fulfilled' && !['delivered', 'shipped'].includes(status)) return;
       const cur = agg[it.product_id] || { product_id: it.product_id, units_sold: 0, revenue: 0 };
       const qty = Number(it.quantity) || 0;
-      const price = Number(it.price) || 0;
       cur.units_sold += qty;
-      cur.revenue += qty * price;
+      cur.revenue += qty * (priceMap[it.product_id] || 0);
       agg[it.product_id] = cur;
     });
     setSales(agg);
-  }, [rawItems, salesFilter]);
+  }, [rawItems, salesFilter, products]);
 
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
