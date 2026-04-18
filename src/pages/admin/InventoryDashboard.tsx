@@ -294,6 +294,7 @@ const InventoryDashboard = () => {
                 <thead className="border-b">
                   <tr className="text-left">
                     <th className="py-2 pr-3">Product</th>
+                    <th className="py-2 px-3 text-right">Price</th>
                     <th className="py-2 px-3 text-right">Stock</th>
                     <th className="py-2 px-3 text-right">Cost</th>
                     <th className="py-2 px-3 text-right">Ads</th>
