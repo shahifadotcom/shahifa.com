@@ -33,11 +33,71 @@ const Countries = () => {
     currency: '',
     is_active: true
   });
+  const [selectionEnabled, setSelectionEnabled] = useState<boolean>(true);
+  const [settingsRowId, setSettingsRowId] = useState<string | null>(null);
+  const [savingSetting, setSavingSetting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchCountries();
+    fetchSelectionSetting();
   }, []);
+
+  const fetchSelectionSetting = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('store_settings')
+        .select('id, country_selection_enabled')
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (data) {
+        setSettingsRowId(data.id);
+        setSelectionEnabled((data as any).country_selection_enabled ?? true);
+      }
+    } catch (err) {
+      console.error('Error fetching selection setting:', err);
+    }
+  };
+
+  const handleToggleSelection = async (checked: boolean) => {
+    setSavingSetting(true);
+    try {
+      let result;
+      if (settingsRowId) {
+        result = await supabase
+          .from('store_settings')
+          .update({ country_selection_enabled: checked })
+          .eq('id', settingsRowId);
+      } else {
+        result = await supabase
+          .from('store_settings')
+          .insert({ country_selection_enabled: checked } as any)
+          .select('id')
+          .single();
+        if (!result.error && (result as any).data?.id) {
+          setSettingsRowId((result as any).data.id);
+        }
+      }
+      if (result.error) throw result.error;
+      setSelectionEnabled(checked);
+      toast({
+        title: 'Setting updated',
+        description: checked
+          ? 'Visitors will be asked to choose their country.'
+          : 'Country will be auto-detected via IP/geolocation.',
+      });
+    } catch (err: any) {
+      console.error('Error updating selection setting:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to update country selection setting',
+        variant: 'destructive',
+      });
+    } finally {
+      setSavingSetting(false);
+    }
+  };
 
   const fetchCountries = async () => {
     try {
