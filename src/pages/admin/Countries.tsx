@@ -33,11 +33,71 @@ const Countries = () => {
     currency: '',
     is_active: true
   });
+  const [selectionEnabled, setSelectionEnabled] = useState<boolean>(true);
+  const [settingsRowId, setSettingsRowId] = useState<string | null>(null);
+  const [savingSetting, setSavingSetting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchCountries();
+    fetchSelectionSetting();
   }, []);
+
+  const fetchSelectionSetting = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('store_settings')
+        .select('id, country_selection_enabled')
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (data) {
+        setSettingsRowId(data.id);
+        setSelectionEnabled((data as any).country_selection_enabled ?? true);
+      }
+    } catch (err) {
+      console.error('Error fetching selection setting:', err);
+    }
+  };
+
+  const handleToggleSelection = async (checked: boolean) => {
+    setSavingSetting(true);
+    try {
+      let result;
+      if (settingsRowId) {
+        result = await supabase
+          .from('store_settings')
+          .update({ country_selection_enabled: checked })
+          .eq('id', settingsRowId);
+      } else {
+        result = await supabase
+          .from('store_settings')
+          .insert({ country_selection_enabled: checked } as any)
+          .select('id')
+          .single();
+        if (!result.error && (result as any).data?.id) {
+          setSettingsRowId((result as any).data.id);
+        }
+      }
+      if (result.error) throw result.error;
+      setSelectionEnabled(checked);
+      toast({
+        title: 'Setting updated',
+        description: checked
+          ? 'Visitors will be asked to choose their country.'
+          : 'Country will be auto-detected via IP/geolocation.',
+      });
+    } catch (err: any) {
+      console.error('Error updating selection setting:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to update country selection setting',
+        variant: 'destructive',
+      });
+    } finally {
+      setSavingSetting(false);
+    }
+  };
 
   const fetchCountries = async () => {
     try {
@@ -276,6 +336,37 @@ const Countries = () => {
               </DialogContent>
             </Dialog>
           </div>
+
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Country Selection Mode</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div className="space-y-1">
+                  <Label htmlFor="selection_enabled" className="text-base font-medium">
+                    Ask visitors to choose their country
+                  </Label>
+                  <p className="text-sm text-muted-foreground max-w-2xl">
+                    {selectionEnabled
+                      ? 'Enabled: Visitors will see a country selection modal on their first visit.'
+                      : "Disabled: The store will automatically detect the visitor's country using IP/geolocation."}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="selection_enabled"
+                    checked={selectionEnabled}
+                    disabled={savingSetting}
+                    onCheckedChange={handleToggleSelection}
+                  />
+                  <span className="text-sm font-medium">
+                    {selectionEnabled ? 'On' : 'Off'}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           <Card>
             <CardHeader>
