@@ -346,7 +346,7 @@ const InventoryDashboard = () => {
                   })}
                   {activeProducts.length === 0 && (
                     <tr>
-                      <td colSpan={10} className="py-8 text-center text-muted-foreground">
+                      <td colSpan={11} className="py-8 text-center text-muted-foreground">
                         No products selected
                       </td>
                     </tr>
