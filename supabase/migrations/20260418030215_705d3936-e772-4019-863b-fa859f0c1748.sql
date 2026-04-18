@@ -1,0 +1,1 @@
+ALTER TABLE public.store_settings ADD COLUMN IF NOT EXISTS country_selection_enabled boolean NOT NULL DEFAULT true;

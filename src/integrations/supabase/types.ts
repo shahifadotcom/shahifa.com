@@ -2140,6 +2140,7 @@ export type Database = {
           contact_address: string | null
           contact_email: string | null
           contact_phone: string | null
+          country_selection_enabled: boolean
           created_at: string
           currency: string | null
           email_notifications: boolean | null
@@ -2160,6 +2161,7 @@ export type Database = {
           contact_address?: string | null
           contact_email?: string | null
           contact_phone?: string | null
+          country_selection_enabled?: boolean
           created_at?: string
           currency?: string | null
           email_notifications?: boolean | null
@@ -2180,6 +2182,7 @@ export type Database = {
           contact_address?: string | null
           contact_email?: string | null
           contact_phone?: string | null
+          country_selection_enabled?: boolean
           created_at?: string
           currency?: string | null
           email_notifications?: boolean | null
