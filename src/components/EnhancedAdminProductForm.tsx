@@ -152,9 +152,11 @@ export const EnhancedAdminProductForm = ({ isOpen, onClose, categories, onSucces
   useEffect(() => {
     const init = async () => {
       if (isOpen && product) {
-        // Try to fetch latest product from DB to avoid stale props
+        // Fetch from products table (not products_catalog view) to include
+        // admin-only cost fields: ads_cost, delivery_charge, return_cost,
+        // packaging_cost, cost_price, vendor_id, etc.
         const { data: fresh, error: freshError } = await supabase
-          .from('products_catalog')
+          .from('products')
           .select('*')
           .eq('id', product.id)
           .single();
