@@ -63,17 +63,26 @@ const Countries = () => {
   const handleToggleSelection = async (checked: boolean) => {
     setSavingSetting(true);
     try {
-      // Update ALL store_settings rows (table may contain duplicates) so the
-      // setting is consistent regardless of which row the storefront reads.
-      const { error: updateError, data: updated } = await supabase
+      // Re-fetch the current settings row id to ensure we target an existing row
+      const { data: existing } = await supabase
         .from('store_settings')
-        .update({ country_selection_enabled: checked })
-        .not('id', 'is', null)
-        .select('id');
+        .select('id')
+        .limit(1)
+        .maybeSingle();
 
-      if (updateError) throw updateError;
+      let updated: { id: string }[] | null = null;
+      if (existing?.id) {
+        const { error: updateError, data } = await supabase
+          .from('store_settings')
+          .update({ country_selection_enabled: checked })
+          .eq('id', existing.id)
+          .select('id');
+        if (updateError) throw updateError;
+        updated = data;
+        setSettingsRowId(existing.id);
+      }
 
-      // If no rows existed, insert one
+      // If no row exists, insert one
       if (!updated || updated.length === 0) {
         const { error: insertError, data: inserted } = await supabase
           .from('store_settings')
