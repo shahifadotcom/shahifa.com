@@ -2012,6 +2012,192 @@ export type Database = {
         }
         Relationships: []
       }
+      social_accounts: {
+        Row: {
+          access_token: string | null
+          account_id: string
+          account_name: string
+          account_username: string | null
+          connected_by: string | null
+          created_at: string
+          group_id: string | null
+          id: string
+          is_active: boolean
+          metadata: Json | null
+          page_id: string | null
+          platform: Database["public"]["Enums"]["social_platform"]
+          profile_image_url: string | null
+          refresh_token: string | null
+          token_expires_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          account_id: string
+          account_name: string
+          account_username?: string | null
+          connected_by?: string | null
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          page_id?: string | null
+          platform: Database["public"]["Enums"]["social_platform"]
+          profile_image_url?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          account_id?: string
+          account_name?: string
+          account_username?: string | null
+          connected_by?: string | null
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          page_id?: string | null
+          platform?: Database["public"]["Enums"]["social_platform"]
+          profile_image_url?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_auto_post_settings: {
+        Row: {
+          ai_tone: string | null
+          content_sources: Database["public"]["Enums"]["social_content_source"][]
+          created_at: string
+          custom_prompts: string[] | null
+          enabled_platforms: Database["public"]["Enums"]["social_platform"][]
+          frequency_per_day: number
+          generate_product_action_images: boolean | null
+          id: string
+          include_hashtags: boolean | null
+          is_enabled: boolean
+          last_run_at: string | null
+          max_hashtags: number | null
+          next_run_at: string | null
+          preferred_times: string[] | null
+          target_account_ids: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          ai_tone?: string | null
+          content_sources?: Database["public"]["Enums"]["social_content_source"][]
+          created_at?: string
+          custom_prompts?: string[] | null
+          enabled_platforms?: Database["public"]["Enums"]["social_platform"][]
+          frequency_per_day?: number
+          generate_product_action_images?: boolean | null
+          id?: string
+          include_hashtags?: boolean | null
+          is_enabled?: boolean
+          last_run_at?: string | null
+          max_hashtags?: number | null
+          next_run_at?: string | null
+          preferred_times?: string[] | null
+          target_account_ids?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          ai_tone?: string | null
+          content_sources?: Database["public"]["Enums"]["social_content_source"][]
+          created_at?: string
+          custom_prompts?: string[] | null
+          enabled_platforms?: Database["public"]["Enums"]["social_platform"][]
+          frequency_per_day?: number
+          generate_product_action_images?: boolean | null
+          id?: string
+          include_hashtags?: boolean | null
+          is_enabled?: boolean
+          last_run_at?: string | null
+          max_hashtags?: number | null
+          next_run_at?: string | null
+          preferred_times?: string[] | null
+          target_account_ids?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_comment_replies: {
+        Row: {
+          account_id: string | null
+          ai_generated: boolean | null
+          comment_text: string
+          commenter_id: string | null
+          commenter_name: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          platform: Database["public"]["Enums"]["social_platform"]
+          platform_comment_id: string
+          post_id: string | null
+          replied_at: string | null
+          reply_status: string
+          reply_text: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          ai_generated?: boolean | null
+          comment_text: string
+          commenter_id?: string | null
+          commenter_name?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          platform: Database["public"]["Enums"]["social_platform"]
+          platform_comment_id: string
+          post_id?: string | null
+          replied_at?: string | null
+          reply_status?: string
+          reply_text?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          ai_generated?: boolean | null
+          comment_text?: string
+          commenter_id?: string | null
+          commenter_name?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          platform?: Database["public"]["Enums"]["social_platform"]
+          platform_comment_id?: string
+          post_id?: string | null
+          replied_at?: string | null
+          reply_status?: string
+          reply_text?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_comment_replies_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_comment_replies_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_links: {
         Row: {
           created_at: string | null
@@ -2042,6 +2228,150 @@ export type Database = {
           platform?: string
           updated_at?: string | null
           url?: string
+        }
+        Relationships: []
+      }
+      social_post_analytics: {
+        Row: {
+          account_id: string
+          clicks: number | null
+          comments: number | null
+          created_at: string
+          engagement_rate: number | null
+          id: string
+          impressions: number | null
+          likes: number | null
+          platform: Database["public"]["Enums"]["social_platform"]
+          platform_post_id: string | null
+          post_id: string
+          raw_metrics: Json | null
+          reach: number | null
+          saves: number | null
+          shares: number | null
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          clicks?: number | null
+          comments?: number | null
+          created_at?: string
+          engagement_rate?: number | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          platform: Database["public"]["Enums"]["social_platform"]
+          platform_post_id?: string | null
+          post_id: string
+          raw_metrics?: Json | null
+          reach?: number | null
+          saves?: number | null
+          shares?: number | null
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          clicks?: number | null
+          comments?: number | null
+          created_at?: string
+          engagement_rate?: number | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          platform?: Database["public"]["Enums"]["social_platform"]
+          platform_post_id?: string | null
+          post_id?: string
+          raw_metrics?: Json | null
+          reach?: number | null
+          saves?: number | null
+          shares?: number | null
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_post_analytics_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "social_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_post_analytics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_posts: {
+        Row: {
+          ai_generated: boolean | null
+          ai_prompt: string | null
+          content: string
+          content_source:
+            | Database["public"]["Enums"]["social_content_source"]
+            | null
+          created_at: string
+          created_by: string | null
+          error_log: string | null
+          hashtags: string[] | null
+          id: string
+          media_urls: string[] | null
+          platform_post_ids: Json | null
+          platforms: Database["public"]["Enums"]["social_platform"][]
+          published_at: string | null
+          scheduled_for: string | null
+          source_reference_id: string | null
+          status: Database["public"]["Enums"]["social_post_status"]
+          target_account_ids: string[] | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_generated?: boolean | null
+          ai_prompt?: string | null
+          content: string
+          content_source?:
+            | Database["public"]["Enums"]["social_content_source"]
+            | null
+          created_at?: string
+          created_by?: string | null
+          error_log?: string | null
+          hashtags?: string[] | null
+          id?: string
+          media_urls?: string[] | null
+          platform_post_ids?: Json | null
+          platforms?: Database["public"]["Enums"]["social_platform"][]
+          published_at?: string | null
+          scheduled_for?: string | null
+          source_reference_id?: string | null
+          status?: Database["public"]["Enums"]["social_post_status"]
+          target_account_ids?: string[] | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_generated?: boolean | null
+          ai_prompt?: string | null
+          content?: string
+          content_source?:
+            | Database["public"]["Enums"]["social_content_source"]
+            | null
+          created_at?: string
+          created_by?: string | null
+          error_log?: string | null
+          hashtags?: string[] | null
+          id?: string
+          media_urls?: string[] | null
+          platform_post_ids?: Json | null
+          platforms?: Database["public"]["Enums"]["social_platform"][]
+          published_at?: string | null
+          scheduled_for?: string | null
+          source_reference_id?: string | null
+          status?: Database["public"]["Enums"]["social_post_status"]
+          target_account_ids?: string[] | null
+          title?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -3393,6 +3723,23 @@ export type Database = {
         | "ended"
         | "missed"
         | "declined"
+      social_content_source:
+        | "product"
+        | "blog_post"
+        | "custom_prompt"
+        | "ai_generated"
+      social_platform:
+        | "facebook_page"
+        | "facebook_group"
+        | "instagram"
+        | "twitter"
+        | "tiktok"
+      social_post_status:
+        | "draft"
+        | "scheduled"
+        | "publishing"
+        | "published"
+        | "failed"
       subscription_status: "active" | "expired" | "cancelled" | "pending"
     }
     CompositeTypes: {
@@ -3529,6 +3876,26 @@ export const Constants = {
         "ended",
         "missed",
         "declined",
+      ],
+      social_content_source: [
+        "product",
+        "blog_post",
+        "custom_prompt",
+        "ai_generated",
+      ],
+      social_platform: [
+        "facebook_page",
+        "facebook_group",
+        "instagram",
+        "twitter",
+        "tiktok",
+      ],
+      social_post_status: [
+        "draft",
+        "scheduled",
+        "publishing",
+        "published",
+        "failed",
       ],
       subscription_status: ["active", "expired", "cancelled", "pending"],
     },
