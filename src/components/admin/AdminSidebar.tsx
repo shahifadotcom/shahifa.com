@@ -69,6 +69,7 @@ const AdminSidebar = () => {
     { icon: Bot, label: "AI Settings", href: "/admin/ai-settings" },
     { icon: Target, label: "Ad Platforms", href: "/admin/ad-platforms" },
     { icon: Sparkles, label: "AI Ads Manager", href: "/admin/ai-ads" },
+    { icon: Share2, label: "AI Social Manager", href: "/admin/ai-social-manager" },
     { icon: Wallet, label: "Binance Pay", href: "/admin/binance-pay" },
     { icon: Phone, label: "Calling Subscriptions", href: "/admin/calling-subscriptions" },
     { icon: MessageSquare, label: "WhatsApp", href: "/admin/whatsapp" },

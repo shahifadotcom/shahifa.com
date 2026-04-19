@@ -64,6 +64,7 @@ import AISettings from "./pages/admin/AISettings";
 import WooCommerceKeys from "./pages/admin/WooCommerceKeys";
 import AdPlatforms from "./pages/admin/AdPlatforms";
 import AIAdsManager from "./pages/admin/AIAdsManager";
+import AISocialManager from "./pages/admin/AISocialManager";
 import BinancePay from "./pages/admin/BinancePay";
 import Stripe from "./pages/admin/Stripe";
 import Reviews from "./pages/admin/Reviews";
@@ -147,6 +148,7 @@ const App = () => {
           <Route path="/admin/ai-settings" element={<AISettings />} />
           <Route path="/admin/ad-platforms" element={<AdPlatforms />} />
           <Route path="/admin/ai-ads" element={<AIAdsManager />} />
+          <Route path="/admin/ai-social-manager" element={<AISocialManager />} />
               <Route path="/admin/binance-pay" element={<BinancePay />} />
               <Route path="/admin/social-links" element={<SocialLinks />} />
               <Route path="/admin/stripe" element={<Stripe />} />
