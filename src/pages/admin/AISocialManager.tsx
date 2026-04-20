@@ -8,6 +8,8 @@ import { Sparkles, Calendar, BarChart3, MessageSquare, Link2, Settings as Settin
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import PostComposerDialog from "@/components/admin/social/PostComposerDialog";
+import SocialAppCredentials from "@/components/admin/social/SocialAppCredentials";
+import ConnectedAccounts from "@/components/admin/social/ConnectedAccounts";
 
 const platformLabels: Record<string, string> = {
   facebook_page: "Facebook Page",
@@ -97,6 +99,7 @@ const AISocialManager = () => {
                 <PhaseRow done label="Phase 1: Foundation (DB + UI shell)" />
                 <PhaseRow done label="Phase 2: AI content & product-action image generation" />
                 <PhaseRow label="Phase 3: OAuth flows (Meta, Twitter/X, TikTok)" />
+                <PhaseRow done label="Phase 3: OAuth flows (Meta, Twitter/X, TikTok)" />
                 <PhaseRow label="Phase 4: Bulk publishing + cron scheduling" />
                 <PhaseRow label="Phase 5: Analytics sync + AI auto-reply" />
                 <Button onClick={() => setComposerOpen(true)} className="w-full mt-2">
@@ -106,45 +109,11 @@ const AISocialManager = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="accounts">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Connected Accounts</CardTitle>
-                  <CardDescription>Connect social accounts via OAuth (available in Phase 3)</CardDescription>
-                </div>
-                <Button disabled>
-                  <Plus className="h-4 w-4 mr-2" /> Connect Account
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <Skeleton className="h-24 w-full" />
-                ) : accounts.length === 0 ? (
-                  <EmptyState
-                    icon={Link2}
-                    title="No accounts connected yet"
-                    description="OAuth integrations will be available in Phase 3."
-                  />
-                ) : (
-                  <div className="space-y-2">
-                    {accounts.map((a) => (
-                      <div key={a.id} className="flex items-center justify-between border rounded-md p-3">
-                        <div>
-                          <div className="font-medium">{a.account_name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {platformLabels[a.platform] || a.platform}
-                          </div>
-                        </div>
-                        <Badge variant={a.is_active ? "default" : "secondary"}>
-                          {a.is_active ? "Active" : "Inactive"}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          <TabsContent value="accounts" className="space-y-4">
+            <ConnectedAccounts />
+            <SocialAppCredentials
+              callbackUrl={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/social-oauth-callback`}
+            />
           </TabsContent>
 
           <TabsContent value="posts">
