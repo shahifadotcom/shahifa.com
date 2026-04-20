@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles, Calendar, BarChart3, MessageSquare, Link2, Settings as SettingsIcon, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import PostComposerDialog from "@/components/admin/social/PostComposerDialog";
 
 const platformLabels: Record<string, string> = {
   facebook_page: "Facebook Page",
@@ -21,6 +22,7 @@ const AISocialManager = () => {
   const [stats, setStats] = useState({ accounts: 0, posts: 0, scheduled: 0, published: 0 });
   const [accounts, setAccounts] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
+  const [composerOpen, setComposerOpen] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -93,10 +95,13 @@ const AISocialManager = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <PhaseRow done label="Phase 1: Foundation (DB + UI shell)" />
-                <PhaseRow label="Phase 2: AI content & product-action image generation" />
+                <PhaseRow done label="Phase 2: AI content & product-action image generation" />
                 <PhaseRow label="Phase 3: OAuth flows (Meta, Twitter/X, TikTok)" />
                 <PhaseRow label="Phase 4: Bulk publishing + cron scheduling" />
                 <PhaseRow label="Phase 5: Analytics sync + AI auto-reply" />
+                <Button onClick={() => setComposerOpen(true)} className="w-full mt-2">
+                  <Sparkles className="h-4 w-4 mr-2" /> Compose AI post
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -149,7 +154,7 @@ const AISocialManager = () => {
                   <CardTitle>Posts</CardTitle>
                   <CardDescription>Drafts, scheduled and published posts</CardDescription>
                 </div>
-                <Button disabled>
+                <Button onClick={() => setComposerOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" /> New Post
                 </Button>
               </CardHeader>
@@ -160,7 +165,7 @@ const AISocialManager = () => {
                   <EmptyState
                     icon={MessageSquare}
                     title="No posts yet"
-                    description="Post composer with AI generation arrives in Phase 2."
+                    description="Click 'New Post' to compose your first AI-generated post."
                   />
                 ) : (
                   <div className="space-y-2">
@@ -218,6 +223,12 @@ const AISocialManager = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <PostComposerDialog
+          open={composerOpen}
+          onOpenChange={setComposerOpen}
+          onSaved={loadData}
+        />
       </div>
     </AdminLayout>
   );
