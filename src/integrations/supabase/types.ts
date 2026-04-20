@@ -1139,6 +1139,42 @@ export type Database = {
         }
         Relationships: []
       }
+      oauth_state_tokens: {
+        Row: {
+          admin_user_id: string
+          code_verifier: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          metadata: Json
+          platform: Database["public"]["Enums"]["social_platform"]
+          redirect_after: string | null
+          state: string
+        }
+        Insert: {
+          admin_user_id: string
+          code_verifier?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          metadata?: Json
+          platform: Database["public"]["Enums"]["social_platform"]
+          redirect_after?: string | null
+          state: string
+        }
+        Update: {
+          admin_user_id?: string
+          code_verifier?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          metadata?: Json
+          platform?: Database["public"]["Enums"]["social_platform"]
+          redirect_after?: string | null
+          state?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string | null
@@ -2065,6 +2101,42 @@ export type Database = {
           profile_image_url?: string | null
           refresh_token?: string | null
           token_expires_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_app_credentials: {
+        Row: {
+          client_id: string
+          client_secret: string
+          created_at: string
+          created_by: string | null
+          extra_config: Json
+          id: string
+          is_active: boolean
+          platform: Database["public"]["Enums"]["social_platform"]
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          client_secret: string
+          created_at?: string
+          created_by?: string | null
+          extra_config?: Json
+          id?: string
+          is_active?: boolean
+          platform: Database["public"]["Enums"]["social_platform"]
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          client_secret?: string
+          created_at?: string
+          created_by?: string | null
+          extra_config?: Json
+          id?: string
+          is_active?: boolean
+          platform?: Database["public"]["Enums"]["social_platform"]
           updated_at?: string
         }
         Relationships: []
