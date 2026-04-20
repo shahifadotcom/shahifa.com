@@ -100,6 +100,9 @@ verify_jwt = false
 [functions.record-transaction]
 verify_jwt = false
 
+[functions.social-oauth-callback]
+verify_jwt = false
+
 [db]
 enabled = true
 port = 54322
