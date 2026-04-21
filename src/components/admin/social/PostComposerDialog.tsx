@@ -126,11 +126,13 @@ const PostComposerDialog = ({ open, onOpenChange, onSaved }: Props) => {
     setSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      // Insert ONE row per platform so each can be retried/tracked independently.
       const rows = captions.map((c) => ({
-        platform: c.platform as any,
+        platforms: [c.platform] as any,
         content: `${c.caption}${c.hashtags?.length ? "\n\n" + c.hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`)).join(" ") : ""}`,
+        hashtags: c.hashtags ?? [],
         media_urls: imageUrl ? [imageUrl] : [],
-        content_source: source as any,
+        content_source: (source === "blog" ? "blog_post" : source === "custom" ? "custom_prompt" : "product") as any,
         source_reference_id: source === "product" ? productId : source === "blog" ? blogId : null,
         status: status as any,
         scheduled_for: status === "scheduled" ? new Date(scheduledFor).toISOString() : null,

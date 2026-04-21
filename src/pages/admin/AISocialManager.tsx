@@ -4,9 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Calendar, BarChart3, MessageSquare, Link2, Settings as SettingsIcon, Plus } from "lucide-react";
+import { Sparkles, Calendar, BarChart3, MessageSquare, Link2, Settings as SettingsIcon, Plus, Send, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/hooks/use-toast";
 import PostComposerDialog from "@/components/admin/social/PostComposerDialog";
 import SocialAppCredentials from "@/components/admin/social/SocialAppCredentials";
 import ConnectedAccounts from "@/components/admin/social/ConnectedAccounts";
@@ -25,6 +26,43 @@ const AISocialManager = () => {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const handlePublishNow = async (postId: string) => {
+    setActionLoading(postId);
+    try {
+      const { data, error } = await supabase.functions.invoke("social-publish-post", {
+        body: { post_id: postId },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const okCount = (data as any)?.results?.filter((r: any) => r.ok).length ?? 0;
+      const total = (data as any)?.total ?? 0;
+      toast({
+        title: (data as any)?.ok ? "Published" : "Publish finished with errors",
+        description: `${okCount}/${total} accounts succeeded`,
+      });
+      await loadData();
+    } catch (e: any) {
+      toast({ title: "Publish failed", description: e.message, variant: "destructive" });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleCancelScheduled = async (postId: string) => {
+    if (!confirm("Cancel this scheduled post? It will become a draft.")) return;
+    const { error } = await supabase
+      .from("social_posts")
+      .update({ status: "draft", scheduled_for: null })
+      .eq("id", postId);
+    if (error) {
+      toast({ title: "Cancel failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Schedule cancelled" });
+    loadData();
+  };
 
   useEffect(() => {
     loadData();
@@ -98,9 +136,8 @@ const AISocialManager = () => {
               <CardContent className="space-y-3">
                 <PhaseRow done label="Phase 1: Foundation (DB + UI shell)" />
                 <PhaseRow done label="Phase 2: AI content & product-action image generation" />
-                <PhaseRow label="Phase 3: OAuth flows (Meta, Twitter/X, TikTok)" />
                 <PhaseRow done label="Phase 3: OAuth flows (Meta, Twitter/X, TikTok)" />
-                <PhaseRow label="Phase 4: Bulk publishing + cron scheduling" />
+                <PhaseRow done label="Phase 4: Bulk publishing + cron scheduling" />
                 <PhaseRow label="Phase 5: Analytics sync + AI auto-reply" />
                 <Button onClick={() => setComposerOpen(true)} className="w-full mt-2">
                   <Sparkles className="h-4 w-4 mr-2" /> Compose AI post
@@ -139,14 +176,57 @@ const AISocialManager = () => {
                 ) : (
                   <div className="space-y-2">
                     {posts.map((p) => (
-                      <div key={p.id} className="border rounded-md p-3">
-                        <div className="flex items-center justify-between mb-1">
-                          <Badge>{p.status}</Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(p.created_at).toLocaleString()}
-                          </span>
+                      <div key={p.id} className="border rounded-md p-3 space-y-2">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge
+                              variant={
+                                p.status === "published"
+                                  ? "default"
+                                  : p.status === "failed"
+                                  ? "destructive"
+                                  : "secondary"
+                              }
+                            >
+                              {p.status}
+                            </Badge>
+                            {(p.platforms ?? []).map((pl: string) => (
+                              <Badge key={pl} variant="outline" className="text-xs">
+                                {platformLabels[pl] ?? pl}
+                              </Badge>
+                            ))}
+                            {p.scheduled_for && (
+                              <span className="text-xs text-muted-foreground">
+                                ⏱ {new Date(p.scheduled_for).toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {(p.status === "draft" || p.status === "scheduled" || p.status === "failed") && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={actionLoading === p.id}
+                                onClick={() => handlePublishNow(p.id)}
+                              >
+                                {actionLoading === p.id ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <><Send className="h-3 w-3 mr-1" /> Publish now</>
+                                )}
+                              </Button>
+                            )}
+                            {p.status === "scheduled" && (
+                              <Button size="sm" variant="ghost" onClick={() => handleCancelScheduled(p.id)}>
+                                <X className="h-3 w-3 mr-1" /> Cancel
+                              </Button>
+                            )}
+                          </div>
                         </div>
                         <p className="text-sm line-clamp-2">{p.content}</p>
+                        {p.last_publish_error && (
+                          <p className="text-xs text-destructive line-clamp-2">{p.last_publish_error}</p>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -160,18 +240,19 @@ const AISocialManager = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <SettingsIcon className="h-5 w-5" />
-                  Auto-Post Settings
+                  Auto-Post & Scheduling
                 </CardTitle>
                 <CardDescription>
-                  Configure daily auto-posting from products, blog posts, or custom AI prompts (Phase 4)
+                  Scheduling is live — a cron job runs every minute and publishes due posts to all selected platforms automatically.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <EmptyState
-                  icon={Calendar}
-                  title="Auto-post engine coming soon"
-                  description="Cron-based daily posting will be enabled in Phase 4."
-                />
+              <CardContent className="space-y-3">
+                <div className="border rounded-md p-3 text-sm">
+                  <strong>How to schedule:</strong> Open the composer, generate captions, pick a date/time, click <em>Schedule</em>. Use <em>Publish now</em> from the Posts tab for instant publishing.
+                </div>
+                <Button onClick={() => setComposerOpen(true)} className="w-full">
+                  <Sparkles className="h-4 w-4 mr-2" /> New scheduled post
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>

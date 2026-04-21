@@ -2388,9 +2388,12 @@ export type Database = {
           error_log: string | null
           hashtags: string[] | null
           id: string
+          last_publish_error: string | null
+          locked_at: string | null
           media_urls: string[] | null
           platform_post_ids: Json | null
           platforms: Database["public"]["Enums"]["social_platform"][]
+          publish_attempts: number
           published_at: string | null
           scheduled_for: string | null
           source_reference_id: string | null
@@ -2411,9 +2414,12 @@ export type Database = {
           error_log?: string | null
           hashtags?: string[] | null
           id?: string
+          last_publish_error?: string | null
+          locked_at?: string | null
           media_urls?: string[] | null
           platform_post_ids?: Json | null
           platforms?: Database["public"]["Enums"]["social_platform"][]
+          publish_attempts?: number
           published_at?: string | null
           scheduled_for?: string | null
           source_reference_id?: string | null
@@ -2434,9 +2440,12 @@ export type Database = {
           error_log?: string | null
           hashtags?: string[] | null
           id?: string
+          last_publish_error?: string | null
+          locked_at?: string | null
           media_urls?: string[] | null
           platform_post_ids?: Json | null
           platforms?: Database["public"]["Enums"]["social_platform"][]
+          publish_attempts?: number
           published_at?: string | null
           scheduled_for?: string | null
           source_reference_id?: string | null
