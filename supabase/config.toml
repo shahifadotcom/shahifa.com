@@ -103,6 +103,9 @@ verify_jwt = false
 [functions.social-oauth-callback]
 verify_jwt = false
 
+[functions.social-scheduler]
+verify_jwt = false
+
 [db]
 enabled = true
 port = 54322
