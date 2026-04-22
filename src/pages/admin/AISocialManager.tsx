@@ -4,13 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Calendar, BarChart3, MessageSquare, Link2, Settings as SettingsIcon, Plus, Send, X, Loader2 } from "lucide-react";
+import { Sparkles, Calendar, BarChart3, MessageSquare, Link2, Settings as SettingsIcon, Plus, Send, X, Loader2, Bot } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import PostComposerDialog from "@/components/admin/social/PostComposerDialog";
 import SocialAppCredentials from "@/components/admin/social/SocialAppCredentials";
 import ConnectedAccounts from "@/components/admin/social/ConnectedAccounts";
+import SocialAnalyticsPanel from "@/components/admin/social/SocialAnalyticsPanel";
+import SocialAutoReplySettings from "@/components/admin/social/SocialAutoReplySettings";
 
 const platformLabels: Record<string, string> = {
   facebook_page: "Facebook Page",
@@ -23,7 +25,6 @@ const platformLabels: Record<string, string> = {
 const AISocialManager = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ accounts: 0, posts: 0, scheduled: 0, published: 0 });
-  const [accounts, setAccounts] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const [composerOpen, setComposerOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -72,17 +73,16 @@ const AISocialManager = () => {
     setLoading(true);
     try {
       const [accountsRes, postsRes] = await Promise.all([
-        supabase.from("social_accounts").select("*").order("created_at", { ascending: false }),
+        supabase.from("social_accounts").select("id"),
         supabase.from("social_posts").select("*").order("created_at", { ascending: false }).limit(20),
       ]);
 
-      const accs = accountsRes.data || [];
+      const accountCount = accountsRes.data?.length ?? 0;
       const ps = postsRes.data || [];
 
-      setAccounts(accs);
       setPosts(ps);
       setStats({
-        accounts: accs.length,
+        accounts: accountCount,
         posts: ps.length,
         scheduled: ps.filter((p) => p.status === "scheduled").length,
         published: ps.filter((p) => p.status === "published").length,
@@ -128,9 +128,9 @@ const AISocialManager = () => {
           <TabsContent value="overview" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Phase 1 Foundation Ready</CardTitle>
+                <CardTitle>Phase 5 Live</CardTitle>
                 <CardDescription>
-                  Database tables & UI shell are now live. Next phases will add OAuth, AI generation, publishing, and auto-reply.
+                  OAuth, AI generation, bulk publishing, analytics sync, and AI auto-reply are now wired into the manager.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -138,7 +138,7 @@ const AISocialManager = () => {
                 <PhaseRow done label="Phase 2: AI content & product-action image generation" />
                 <PhaseRow done label="Phase 3: OAuth flows (Meta, Twitter/X, TikTok)" />
                 <PhaseRow done label="Phase 4: Bulk publishing + cron scheduling" />
-                <PhaseRow label="Phase 5: Analytics sync + AI auto-reply" />
+                <PhaseRow done label="Phase 5: Analytics sync + AI auto-reply" />
                 <Button onClick={() => setComposerOpen(true)} className="w-full mt-2">
                   <Sparkles className="h-4 w-4 mr-2" /> Compose AI post
                 </Button>
@@ -257,18 +257,19 @@ const AISocialManager = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="analytics">
+          <TabsContent value="analytics" className="space-y-4">
+            <SocialAnalyticsPanel />
             <Card>
               <CardHeader>
-                <CardTitle>Engagement Analytics</CardTitle>
-                <CardDescription>Reach, impressions, likes, comments per post (Phase 5)</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Bot className="h-5 w-5" /> Reply Automation
+                </CardTitle>
+                <CardDescription>
+                  Configure the AI comment bot and trigger a manual run any time.
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <EmptyState
-                  icon={BarChart3}
-                  title="No analytics data yet"
-                  description="Analytics syncing arrives in Phase 5."
-                />
+                <SocialAutoReplySettings />
               </CardContent>
             </Card>
           </TabsContent>
