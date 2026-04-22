@@ -259,19 +259,7 @@ const AISocialManager = () => {
 
           <TabsContent value="analytics" className="space-y-4">
             <SocialAnalyticsPanel />
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bot className="h-5 w-5" /> Reply Automation
-                </CardTitle>
-                <CardDescription>
-                  Configure the AI comment bot and trigger a manual run any time.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <SocialAutoReplySettings />
-              </CardContent>
-            </Card>
+            <SocialAutoReplySettings />
           </TabsContent>
         </Tabs>
 
