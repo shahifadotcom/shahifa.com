@@ -2198,6 +2198,42 @@ export type Database = {
         }
         Relationships: []
       }
+      social_auto_reply_settings: {
+        Row: {
+          created_at: string
+          enabled_platforms: string[]
+          id: string
+          is_enabled: boolean
+          max_replies_per_post: number
+          reply_only_to_questions: boolean
+          system_prompt: string
+          tone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled_platforms?: string[]
+          id?: string
+          is_enabled?: boolean
+          max_replies_per_post?: number
+          reply_only_to_questions?: boolean
+          system_prompt?: string
+          tone?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled_platforms?: string[]
+          id?: string
+          is_enabled?: boolean
+          max_replies_per_post?: number
+          reply_only_to_questions?: boolean
+          system_prompt?: string
+          tone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       social_comment_replies: {
         Row: {
           account_id: string | null
