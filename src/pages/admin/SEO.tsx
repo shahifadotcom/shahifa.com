@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import AdminLayout from '@/layouts/AdminLayout';
+import { SeoAutopilotPanel } from '@/components/admin/SeoAutopilotPanel';
 import { Search, Globe, FileText, Zap, Check, X, RefreshCw, Copy, Download } from 'lucide-react';
 
 interface SitemapCache {
@@ -215,10 +216,11 @@ export default function SEO() {
         </div>
 
         <Tabs defaultValue="seo" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="seo">SEO Settings</TabsTrigger>
             <TabsTrigger value="sitemap">Sitemap</TabsTrigger>
             <TabsTrigger value="search-engines">Search Engines</TabsTrigger>
+            <TabsTrigger value="autopilot">AI Autopilot</TabsTrigger>
             <TabsTrigger value="preview">Preview</TabsTrigger>
           </TabsList>
 
@@ -576,6 +578,10 @@ export default function SEO() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="autopilot" className="space-y-4">
+            <SeoAutopilotPanel />
           </TabsContent>
 
           <TabsContent value="preview" className="space-y-4">
