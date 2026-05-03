@@ -15,7 +15,7 @@ echo -e "${BLUE}Setting up WhatsApp Bridge Environment Variable...${NC}"
 echo "================================================="
 
 # Default WhatsApp bridge URL
-WHATSAPP_BRIDGE_URL="http://161.97.169.64:3001"
+WHATSAPP_BRIDGE_URL="http://45.88.191.92:3001"
 
 echo -e "${YELLOW}Setting WHATSAPP_BRIDGE_URL to: $WHATSAPP_BRIDGE_URL${NC}"
 

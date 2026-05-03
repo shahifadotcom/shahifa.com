@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       "/wa": {
-        target: "http://161.97.169.64:3001",
+        target: "http://45.88.191.92:3001",
         changeOrigin: true,
         ws: true,
         rewrite: (p) => p.replace(/^\/wa/, "")

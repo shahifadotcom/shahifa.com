@@ -9,7 +9,7 @@
 
 ### 2. WhatsApp Bridge Configuration
 - **Status**: ✅ Updated
-- **Bridge URL**: `http://161.97.169.64:3001`
+- **Bridge URL**: `http://45.88.191.92:3001`
 - **Files Updated**:
   - `src/pages/admin/WhatsApp.tsx` - Admin UI
   - `supabase/functions/send-whatsapp-message/index.ts` - Message sender
@@ -46,7 +46,7 @@ The `send-whatsapp-message` function was:
 
 ### Fix Applied:
 Updated `send-whatsapp-message` to:
-- ✅ Connect directly to WhatsApp bridge at `161.97.169.64:3001`
+- ✅ Connect directly to WhatsApp bridge at `45.88.191.92:3001`
 - ✅ Use `/send-message` endpoint for actual message delivery
 - ✅ Proper error handling and logging
 - ✅ Store success/failure status in `notification_logs` table
@@ -66,12 +66,12 @@ curl -X POST https://mofwljpreecqqxkilywh.supabase.co/functions/v1/test-whatsapp
 
 #### Step 1: Verify WhatsApp Bridge is Running
 ```bash
-# On your server (161.97.169.64)
+# On your server (45.88.191.92)
 cd whatsapp-bridge
 ./start.sh
 
 # Verify it's running
-curl http://161.97.169.64:3001/status
+curl http://45.88.191.92:3001/status
 ```
 
 #### Step 2: Connect WhatsApp
@@ -113,12 +113,12 @@ All tables have proper Row-Level Security (RLS) policies:
 ## 🚨 Important Notes
 
 ### WhatsApp Bridge Requirements:
-1. **Must be running** at `161.97.169.64:3001`
+1. **Must be running** at `45.88.191.92:3001`
 2. **Must have active WhatsApp session** (scan QR code)
 3. **Port 3001 must be accessible** from Supabase servers
 
 ### Environment Variables:
-- `WHATSAPP_BRIDGE_URL`: Set in Supabase secrets (defaults to `http://161.97.169.64:3001`)
+- `WHATSAPP_BRIDGE_URL`: Set in Supabase secrets (defaults to `http://45.88.191.92:3001`)
 
 ### Common Issues:
 
@@ -165,12 +165,12 @@ All tables have proper Row-Level Security (RLS) policies:
 
 - WhatsApp Admin Panel: `/admin/whatsapp`
 - Test Function: `https://mofwljpreecqqxkilywh.supabase.co/functions/v1/test-whatsapp-flow`
-- Bridge Status: `http://161.97.169.64:3001/status`
+- Bridge Status: `http://45.88.191.92:3001/status`
 - Edge Function Logs: https://supabase.com/dashboard/project/mofwljpreecqqxkilywh/functions
 
 ## ✅ Verification Checklist
 
-- [ ] WhatsApp bridge running at 161.97.169.64:3001
+- [ ] WhatsApp bridge running at 45.88.191.92:3001
 - [ ] QR code scanned and WhatsApp connected
 - [ ] Test function returns all steps passed
 - [ ] OTP messages received on test phone

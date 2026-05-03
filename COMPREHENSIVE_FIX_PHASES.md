@@ -32,10 +32,10 @@
 - [x] Show proper instructions based on selected mode in admin/binance-pay
 
 ## Phase 6: SMS Transaction Scanner Fixes ✅
-- [x] Update Android SMS server URL to http://161.97.169.64:3000
+- [x] Update Android SMS server URL to http://45.88.191.92:3000
 - [x] Make sms-transaction-local public (no JWT required)
 - [x] Update SMSReceiver.java to use correct server IP with fallback to Supabase
-- [x] Update AndroidApp.tsx to show correct server URL (161.97.169.64:3000)
+- [x] Update AndroidApp.tsx to show correct server URL (45.88.191.92:3000)
 - [x] Create fallback mechanism: try local server first, then Supabase direct
 
 ## Phase 7: Store Branding Public Access ✅
@@ -52,7 +52,7 @@
 All phases completed! Key improvements:
 - Reviews now require admin approval
 - Binance Pay supports manual/auto verification modes
-- SMS scanner uses local server (161.97.169.64:3000) with Supabase fallback
+- SMS scanner uses local server (45.88.191.92:3000) with Supabase fallback
 - Notifications sent only to admin for "confirmed" orders
 - Store branding auto-syncs for public visibility
 - OTP rate limits removed

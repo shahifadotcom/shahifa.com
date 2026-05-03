@@ -135,7 +135,7 @@ serve(async (req) => {
     }
 
     // Send OTP via WhatsApp directly to bridge
-    const whatsappBridgeUrl = Deno.env.get('WHATSAPP_BRIDGE_URL') || 'http://161.97.169.64:3001';
+    const whatsappBridgeUrl = Deno.env.get('WHATSAPP_BRIDGE_URL') || 'http://45.88.191.92:3001';
     
     try {
       const whatsappResponse = await fetch(`${whatsappBridgeUrl}/send-message`, {
