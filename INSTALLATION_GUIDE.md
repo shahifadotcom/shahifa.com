@@ -130,11 +130,11 @@ SUPABASE_ANON_KEY=your_supabase_anon_key
 
 After starting, you can access:
 
-- **Main Application:** http://161.97.169.64:3000 (or http://localhost:3000)
-- **Admin Panel:** http://161.97.169.64:3000/admin
-- **WhatsApp Admin:** http://161.97.169.64:3000/admin/whatsapp
-- **WhatsApp Bridge:** http://161.97.169.64:3001
-- **Calling Server:** http://161.97.169.64:3002
+- **Main Application:** http://45.88.191.92:3000 (or http://localhost:3000)
+- **Admin Panel:** http://45.88.191.92:3000/admin
+- **WhatsApp Admin:** http://45.88.191.92:3000/admin/whatsapp
+- **WhatsApp Bridge:** http://45.88.191.92:3001
+- **Calling Server:** http://45.88.191.92:3002
 
 ## PM2 Commands
 
@@ -208,7 +208,7 @@ sudo apt-get install -y nodejs
    pm2 logs whatsapp-bridge
    ```
 
-2. Visit the admin panel at http://161.97.169.64:3000/admin/whatsapp
+2. Visit the admin panel at http://45.88.191.92:3000/admin/whatsapp
 
 3. Click "Initialize WhatsApp" and scan the QR code with your mobile device
 

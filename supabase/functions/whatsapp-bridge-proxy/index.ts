@@ -58,7 +58,7 @@ serve(async (req) => {
   }
 
   try {
-    const bridgeUrl = Deno.env.get('WHATSAPP_BRIDGE_URL') || 'http://161.97.169.64:3001';
+    const bridgeUrl = Deno.env.get('WHATSAPP_BRIDGE_URL') || 'http://45.88.191.92:3001';
     const url = new URL(req.url);
     const path = url.searchParams.get('path') || '/status';
 

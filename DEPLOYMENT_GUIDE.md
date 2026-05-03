@@ -1,7 +1,7 @@
 # Shahifa E-commerce Platform - Complete Deployment Guide
 
 ## Overview
-This guide covers the complete setup of the Shahifa e-commerce platform with WhatsApp integration on Ubuntu server (161.97.169.64).
+This guide covers the complete setup of the Shahifa e-commerce platform with WhatsApp integration on Ubuntu server (45.88.191.92).
 
 ## Architecture
 
@@ -72,7 +72,7 @@ The start script handles:
 
 **First Time Setup:**
 
-1. Visit: `http://161.97.169.64/admin/whatsapp`
+1. Visit: `http://45.88.191.92/admin/whatsapp`
 2. The page will auto-check for existing session
 3. If not connected:
    - Click "Connect WhatsApp"
@@ -90,12 +90,12 @@ The start script handles:
 ## URLs and Endpoints
 
 ### Public URLs
-- **Main Application**: `http://161.97.169.64`
-- **Admin Panel**: `http://161.97.169.64/admin/whatsapp`
-- **Product Details**: `http://161.97.169.64/products/{product-slug}`
+- **Main Application**: `http://45.88.191.92`
+- **Admin Panel**: `http://45.88.191.92/admin/whatsapp`
+- **Product Details**: `http://45.88.191.92/products/{product-slug}`
 
 ### Internal Endpoints (Proxied by Nginx)
-- **WhatsApp Bridge**: `http://161.97.169.64/wa` → `http://localhost:3001`
+- **WhatsApp Bridge**: `http://45.88.191.92/wa` → `http://localhost:3001`
   - `/wa/status` - Check connection status
   - `/wa/initialize` - Generate QR code
   - `/wa/send-message` - Send WhatsApp message
@@ -113,7 +113,7 @@ The start script handles:
 2. **User clicks "Place Order"** → Triggers OTP send
 3. **OTP Modal opens instantly** → Background OTP sending begins
 4. **`send-otp` edge function** → Calls `send-whatsapp-message`
-5. **`send-whatsapp-message`** → Calls `http://161.97.169.64/wa/send-message`
+5. **`send-whatsapp-message`** → Calls `http://45.88.191.92/wa/send-message`
 6. **WhatsApp Bridge** → Sends OTP via WhatsApp Web
 7. **User receives OTP** → Enters in modal
 8. **`verify-otp-and-create-order`** → Verifies and creates order
@@ -234,7 +234,7 @@ PORT=3001
 
 ### Supabase Secrets (via Supabase Dashboard)
 ```
-WHATSAPP_BRIDGE_URL=http://161.97.169.64/wa
+WHATSAPP_BRIDGE_URL=http://45.88.191.92/wa
 SUPABASE_URL=https://mofwljpreecqqxkilywh.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=...
 ```
@@ -251,7 +251,7 @@ curl http://localhost:3001/status
 
 2. **Check Nginx proxy:**
 ```bash
-curl http://161.97.169.64/wa/status
+curl http://45.88.191.92/wa/status
 ```
 
 3. **Restart WhatsApp bridge:**
@@ -278,11 +278,11 @@ pm2 restart whatsapp-bridge
 
 2. **Verify WhatsApp bridge URL in Supabase:**
 - Edge Functions → Settings → Secrets
-- Ensure `WHATSAPP_BRIDGE_URL=http://161.97.169.64/wa`
+- Ensure `WHATSAPP_BRIDGE_URL=http://45.88.191.92/wa`
 
 3. **Test WhatsApp bridge directly:**
 ```bash
-curl -X POST http://161.97.169.64/wa/send-message \
+curl -X POST http://45.88.191.92/wa/send-message \
   -H "Content-Type: application/json" \
   -d '{"phoneNumber":"+1234567890","message":"Test"}'
 ```
@@ -461,7 +461,7 @@ pm2 restart all && sudo systemctl reload nginx
 pm2 logs
 
 # Check WhatsApp connection
-curl http://161.97.169.64/wa/status | jq
+curl http://45.88.191.92/wa/status | jq
 
 # Test OTP flow (from Supabase SQL editor)
 SELECT * FROM otp_verifications ORDER BY created_at DESC LIMIT 10;

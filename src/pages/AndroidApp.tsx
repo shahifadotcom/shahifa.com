@@ -28,7 +28,7 @@ export default function AndroidApp() {
   const [backgroundPermission, setBackgroundPermission] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>({
     connected: false,
-    serverUrl: 'http://161.97.169.64:3000'
+    serverUrl: 'http://45.88.191.92:3000'
   });
   const [recentMessages, setRecentMessages] = useState<SMSMessage[]>([]);
   const [processingCount, setProcessingCount] = useState(0);
@@ -116,7 +116,7 @@ export default function AndroidApp() {
       setIsConnected(true);
       setConnectionStatus({
         connected: true,
-        serverUrl: 'http://161.97.169.64:3000',
+        serverUrl: 'http://45.88.191.92:3000',
         lastHeartbeat: Date.now()
       });
 

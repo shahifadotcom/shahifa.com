@@ -227,7 +227,7 @@ For manual verification:
 | Endpoint | Purpose |
 |----------|---------|
 | `https://mofwljpreecqqxkilywh.supabase.co/functions/v1/sms-transaction-handler` | Receives SMS transaction data |
-| `http://161.97.169.64` | Local server IP (shown in app UI) |
+| `http://45.88.191.92` | Local server IP (shown in app UI) |
 
 ---
 

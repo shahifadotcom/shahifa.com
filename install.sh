@@ -129,7 +129,7 @@ echo -e "${YELLOW}Setting up Nginx configuration...${NC}"
 sudo tee /etc/nginx/sites-available/shahifa-ecommerce << 'EOF'
 server {
     listen 80;
-    server_name 161.97.169.64;
+    server_name 45.88.191.92;
 
     # Main application proxy
     location / {
@@ -181,10 +181,10 @@ pm2 startup
 echo -e "${GREEN}Installation completed successfully!${NC}"
 echo ""
 echo -e "${BLUE}Application Information:${NC}"
-echo -e "Main App: http://161.97.169.64"
-echo -e "Admin Panel: http://161.97.169.64/admin/whatsapp"
-echo -e "WhatsApp Bridge: http://161.97.169.64/wa (proxied)"
-echo -e "Calling Server: http://161.97.169.64:3002"
+echo -e "Main App: http://45.88.191.92"
+echo -e "Admin Panel: http://45.88.191.92/admin/whatsapp"
+echo -e "WhatsApp Bridge: http://45.88.191.92/wa (proxied)"
+echo -e "Calling Server: http://45.88.191.92:3002"
 echo ""
 echo -e "${BLUE}Useful Commands:${NC}"
 echo -e "View all apps: pm2 list"
@@ -196,7 +196,7 @@ echo -e "Restart all: pm2 restart all"
 echo -e "Monitor: pm2 monit"
 echo ""
 echo -e "${YELLOW}Next Steps:${NC}"
-echo -e "1. Visit http://161.97.169.64/admin/whatsapp"
+echo -e "1. Visit http://45.88.191.92/admin/whatsapp"
 echo -e "2. The page should auto-detect existing WhatsApp session"
 echo -e "3. If not connected, click 'Connect WhatsApp' and scan QR"
 echo -e "4. Test OTP flow by placing an order"

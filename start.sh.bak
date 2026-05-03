@@ -98,7 +98,7 @@ install_dependencies() {
 start_server() {
     echo "🏗️  Building and starting the development server..."
     echo "🌐 Server will be available at: http://localhost:$PORT"
-    echo "🌐 External access at: http://161.97.169.64:$PORT"
+    echo "🌐 External access at: http://45.88.191.92:$PORT"
     echo ""
     echo "📊 Server logs:"
     echo "=================================================================================="

@@ -39,7 +39,7 @@ const WhatsApp = () => {
     const checkExistingSession = async () => {
       const endpoints = [
         'http://localhost:3001',
-        'http://161.97.169.64:3001'
+        'http://45.88.191.92:3001'
       ];
       
       addLog('Checking for existing WhatsApp session across multiple endpoints...');
@@ -131,8 +131,8 @@ const WhatsApp = () => {
       checkForConnection();
     } catch (error) {
       console.error('Error initializing WhatsApp:', error);
-      toast.error('Failed to contact local bridge at 161.97.169.64:3001');
-      addLog('Failed to contact local bridge at http://161.97.169.64:3001');
+      toast.error('Failed to contact local bridge at 45.88.191.92:3001');
+      addLog('Failed to contact local bridge at http://45.88.191.92:3001');
     } finally {
       setLoading(false);
     }
