@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 // Strict allowlist to prevent SSRF
-const ALLOWED_PATHS = ['/status', '/send-message', '/qr-code', '/logout', '/restart'];
+const ALLOWED_PATHS = ['/status', '/send-message', '/qr-code', '/logout', '/restart', '/initialize', '/disconnect'];
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
