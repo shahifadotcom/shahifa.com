@@ -6,7 +6,7 @@ import { Smartphone, QrCode, MessageSquare, Settings, Users, Activity } from "lu
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/layouts/AdminLayout";
-import { BRIDGE_WS, buildBridgeUrl } from "@/lib/whatsappBridge";
+import { BRIDGE_WS, bridgeFetch } from "@/lib/whatsappBridge";
 
 interface WhatsAppStatus {
   isConnected: boolean;
@@ -47,7 +47,7 @@ const WhatsApp = () => {
       for (const endpoint of endpoints) {
         try {
           addLog(`Trying ${endpoint}...`);
-          const response = await fetch(buildBridgeUrl('/status'));
+          const response = await bridgeFetch('/status');
           
           if (response.ok) {
             const data = await response.json();
@@ -122,7 +122,7 @@ const WhatsApp = () => {
     try {
       ensureWebSocket();
       // HTTP fallback to trigger QR generation
-      const res = await fetch(buildBridgeUrl('/initialize'), { method: 'POST' });
+      const res = await bridgeFetch('/initialize', { method: 'POST' });
       const data = await res.json().catch(() => ({}));
       if (data?.qrCode) {
         await generateQRImage(data.qrCode);
@@ -141,7 +141,7 @@ const WhatsApp = () => {
   const checkForConnection = () => {
     const connectionCheck = setInterval(async () => {
       try {
-        const res = await fetch(buildBridgeUrl('/status'));
+        const res = await bridgeFetch('/status');
         const data = await res.json();
         if (data?.isReady) {
           clearInterval(connectionCheck);
@@ -163,7 +163,7 @@ const WhatsApp = () => {
   const disconnectWhatsApp = async () => {
     setLoading(true);
     try {
-      await fetch(buildBridgeUrl('/disconnect'), { method: 'POST' });
+      await bridgeFetch('/disconnect', { method: 'POST' });
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         wsRef.current.send(JSON.stringify({ action: 'disconnect' }));
         wsRef.current.close();
@@ -259,7 +259,7 @@ const WhatsApp = () => {
     }
 
     // HTTP fallback
-    fetch(buildBridgeUrl('/send-message'), {
+    bridgeFetch('/send-message', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phoneNumber, message })
