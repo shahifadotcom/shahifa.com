@@ -3,39 +3,35 @@
   <!-- Homepage -->
   <url>
     <loc>https://shahifa.com</loc>
-    <lastmod>2025-12-03</lastmod>
+    <lastmod>2026-05-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
-  
+
   <!-- Shop -->
   <url>
     <loc>https://shahifa.com/shop</loc>
-    <lastmod>2025-12-03</lastmod>
+    <lastmod>2026-05-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
-  
-  <!-- Categories -->
+
+  <!-- Blog -->
   <url>
-    <loc>https://shahifa.com/categories/man-s-fashion</loc>
-    <lastmod>2025-11-02</lastmod>
+    <loc>https://shahifa.com/blog</loc>
+    <lastmod>2026-05-14</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
+
+  <!-- Returns & Refunds -->
   <url>
-    <loc>https://shahifa.com/categories/home-living</loc>
-    <lastmod>2025-11-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://shahifa.com/returns-refunds</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
   </url>
-  <url>
-    <loc>https://shahifa.com/categories/gadgets</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
+
   <!-- Products -->
   <url>
     <loc>https://shahifa.com/products/koleer-portable-wireless-bluetooth-speaker-deep-bass-better-sound-quality</loc>
@@ -121,24 +117,12 @@
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
-  
+
   <!-- Static Pages -->
   <url>
-    <loc>https://shahifa.com/auth</loc>
-    <lastmod>2025-12-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://shahifa.com/orders</loc>
-    <lastmod>2025-12-03</lastmod>
+    <lastmod>2026-05-14</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://shahifa.com/blog</loc>
-    <lastmod>2025-12-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.5</priority>
   </url>
 </urlset>
