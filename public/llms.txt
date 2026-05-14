@@ -1,0 +1,16 @@
+# shahifa Online Shop
+
+> Trusted online store offering gadgets, fashion, home & living essentials with free delivery and secure checkout.
+
+## Pages
+
+- [Home](/): Featured products, categories, and storefront highlights.
+- [Shop](/shop): Browse the full product catalog.
+- [Blog](/blog): Articles, buying guides, and product news.
+- [Search](/search): Search the store catalog.
+- [Returns & Refunds](/returns-refunds): Return policy and refund process.
+
+## Optional
+
+- [Sign in](/auth): Customer account login and registration.
+- [Orders](/orders): Track and review past orders.

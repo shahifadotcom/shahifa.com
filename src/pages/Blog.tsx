@@ -49,8 +49,26 @@ export default function Blog() {
   return (
     <>
       <Helmet>
-        <title>Blog - Latest Articles & Updates</title>
-        <meta name="description" content="Read our latest blog posts, articles, and updates" />
+        <title>Blog - Latest Articles & Updates | shahifa Online Shop</title>
+        <meta name="description" content="Read the latest articles, buying guides, and product updates from shahifa Online Shop." />
+        <meta property="og:title" content="Blog - shahifa Online Shop" />
+        <meta property="og:description" content="Latest articles, buying guides, and product updates from shahifa Online Shop." />
+        <meta property="og:url" content="https://shahifa.com/blog" />
+        <link rel="canonical" href="https://shahifa.com/blog" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "shahifa Online Shop Blog",
+          "url": "https://shahifa.com/blog",
+          "description": "Latest articles, buying guides, and product updates from shahifa Online Shop.",
+          "hasPart": posts.map((p) => ({
+            "@type": "BlogPosting",
+            "headline": p.title,
+            "url": `https://shahifa.com/blog/${p.slug}`,
+            "datePublished": p.published_at,
+            "image": p.featured_image || undefined,
+          })),
+        })}</script>
       </Helmet>
 
       <div className="min-h-screen flex flex-col bg-background">

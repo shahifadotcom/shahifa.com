@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Package, Clock, CheckCircle, Truck, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { usePageHead } from '@/hooks/usePageHead';
 
 interface Order {
   id: string;
@@ -24,6 +25,12 @@ interface Order {
 }
 
 const Dashboard = () => {
+  usePageHead({
+    title: 'Your dashboard | shahifa Online Shop',
+    description: 'View your recent orders, delivery status, and account activity on shahifa Online Shop.',
+    path: '/dashboard',
+    noindex: true,
+  });
   const { user } = useAuth();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);

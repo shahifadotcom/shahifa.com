@@ -9,10 +9,19 @@ import MobileBottomNav from '@/components/MobileBottomNav';
 import ProductCard from '@/components/ProductCard';
 import ProductDetailModal from '@/components/ProductDetailModal';
 import { Loader2, SearchX } from 'lucide-react';
+import { usePageHead } from '@/hooks/usePageHead';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
+  usePageHead({
+    title: searchQuery ? `Search results for "${searchQuery}" | shahifa Online Shop` : 'Search products | shahifa Online Shop',
+    description: searchQuery
+      ? `Browse products matching "${searchQuery}" at shahifa Online Shop with free delivery and secure checkout.`
+      : 'Search the shahifa Online Shop catalog for gadgets, fashion, and home essentials with free delivery.',
+    path: searchQuery ? `/search?q=${encodeURIComponent(searchQuery)}` : '/search',
+    noindex: true,
+  });
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);

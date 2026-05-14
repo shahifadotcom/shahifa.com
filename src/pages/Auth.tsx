@@ -7,8 +7,15 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { usePageHead } from '@/hooks/usePageHead';
 
 export default function Auth() {
+  usePageHead({
+    title: 'Sign in or create an account | shahifa Online Shop',
+    description: 'Sign in to your shahifa Online Shop account or create a new one to track orders, save favourites, and check out faster.',
+    path: '/auth',
+    noindex: true,
+  });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');

@@ -18,6 +18,7 @@ import { PaymentSelector } from '@/components/payment/PaymentSelector';
 import { useCountryDetection } from '@/hooks/useCountryDetection';
 import { SuggestedProducts } from '@/components/SuggestedProducts';
 import { z } from 'zod';
+import { usePageHead } from '@/hooks/usePageHead';
 
 interface CheckoutFormData {
   country: string;
@@ -27,6 +28,12 @@ interface CheckoutFormData {
 }
 
 const Checkout = () => {
+  usePageHead({
+    title: 'Checkout — review your order | shahifa Online Shop',
+    description: 'Securely complete your order at shahifa Online Shop with cash on delivery and trusted online payment options.',
+    path: '/checkout',
+    noindex: true,
+  });
   const navigate = useNavigate();
   const { cart, clearCart } = useCart();
   const { user } = useAuth();
