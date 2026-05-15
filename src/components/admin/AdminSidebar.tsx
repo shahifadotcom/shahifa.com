@@ -61,6 +61,7 @@ const AdminSidebar = () => {
     { icon: Truck, label: "Shipping", href: "/admin/shipping" },
     { icon: Globe, label: "Google Services", href: "/admin/google-services" },
     { icon: Search, label: "SEO & Search", href: "/admin/seo" },
+    { icon: Search, label: "SEO Dashboard", href: "/admin/seo-dashboard" },
     { icon: FileText, label: "Blog", href: "/admin/blog" },
     { icon: Image, label: "Storefront Slider", href: "/admin/storefront-slider" },
     { icon: Palette, label: "Theme", href: "/admin/theme" },
