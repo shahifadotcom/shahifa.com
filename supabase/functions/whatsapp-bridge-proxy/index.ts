@@ -58,7 +58,13 @@ serve(async (req) => {
   }
 
   try {
-    const bridgeUrl = Deno.env.get('WHATSAPP_BRIDGE_URL') || 'http://45.88.191.92:3001';
+    let bridgeUrl = Deno.env.get('WHATSAPP_BRIDGE_URL') || 'http://45.88.191.92:3001';
+    // Ensure URL has a scheme (env var may be stored without http://)
+    if (!/^https?:\/\//i.test(bridgeUrl)) {
+      bridgeUrl = `http://${bridgeUrl}`;
+    }
+    // Strip trailing slash to avoid double slashes
+    bridgeUrl = bridgeUrl.replace(/\/+$/, '');
     const url = new URL(req.url);
     const path = url.searchParams.get('path') || '/status';
 
