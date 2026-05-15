@@ -31,6 +31,7 @@ import Reports from "./pages/admin/Reports";
 import PaymentGateways from "./pages/admin/PaymentGateways";
 import GoogleServices from "./pages/admin/GoogleServices";
 import SEO from "./pages/admin/SEO";
+import SeoDashboard from "./pages/admin/SeoDashboard";
 import Vendors from "./pages/admin/Vendors";
 import PaymentMethods from "./pages/admin/PaymentMethods";
 import OrderAutomation from "./pages/admin/OrderAutomation";
@@ -134,6 +135,7 @@ const App = () => {
               <Route path="/admin/order-automation" element={<OrderAutomation />} />
               <Route path="/admin/google-services" element={<GoogleServices />} />
               <Route path="/admin/seo" element={<SEO />} />
+              <Route path="/admin/seo-dashboard" element={<SeoDashboard />} />
               <Route path="/admin/theme" element={<Theme />} />
               <Route path="/admin/countries" element={<Countries />} />
               <Route path="/admin/ip-ranges" element={<IPRanges />} />
