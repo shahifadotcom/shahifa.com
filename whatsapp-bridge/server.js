@@ -18,6 +18,42 @@ let currentQR = null;
 let isReady = false;
 let isInitializing = false;
 
+function isStaleBrowserError(error) {
+    const message = error && error.message ? error.message : String(error || '');
+    return /detached Frame|Session closed|Target closed|Protocol error|Execution context was destroyed|Cannot find context/i.test(message);
+}
+
+async function resetClient(reason) {
+    console.error('Resetting WhatsApp client:', reason);
+    isReady = false;
+    currentQR = null;
+    isInitializing = false;
+
+    if (client) {
+        try {
+            await client.destroy();
+        } catch (destroyError) {
+            console.error('Client destroy error:', destroyError.message);
+        }
+    }
+
+    client = null;
+    try { broadcast({ type: 'disconnected', reason }); } catch (_) {}
+}
+
+async function verifyClientReady() {
+    if (!isReady || !client) {
+        return false;
+    }
+
+    try {
+        return Boolean(client.info && client.pupPage && !client.pupPage.isClosed());
+    } catch (error) {
+        await resetClient(error.message);
+        return false;
+    }
+}
+
 // Initialize WhatsApp client
 function initializeClient() {
     if (isInitializing) {
@@ -137,10 +173,10 @@ app.post('/send-message', async (req, res) => {
         });
     }
 
-    if (!isReady || !client) {
+    if (!(await verifyClientReady())) {
         return res.status(400).json({
             success: false,
-            error: 'WhatsApp client is not ready'
+            error: 'WhatsApp client is not ready. Please reconnect WhatsApp from the admin panel.'
         });
     }
 
@@ -184,6 +220,20 @@ app.post('/send-message', async (req, res) => {
         });
     } catch (error) {
         console.error('Send message error:', error);
+        if (isStaleBrowserError(error)) {
+            await resetClient(error.message);
+            setTimeout(() => {
+                initializeClient().catch((initError) => {
+                    console.error('Reinitialize after stale browser error failed:', initError.message);
+                });
+            }, 1000);
+
+            return res.status(503).json({
+                success: false,
+                error: 'WhatsApp session became stale. The bridge has been reset; please scan the QR code again if required.'
+            });
+        }
+
         res.status(500).json({
             success: false,
             error: error.message
@@ -252,7 +302,7 @@ wss.on('connection', (ws) => {
                     break;
                 }
                 case 'send_message': {
-                    if (!isReady || !client) throw new Error('WhatsApp not ready');
+                    if (!(await verifyClientReady())) throw new Error('WhatsApp not ready. Please reconnect WhatsApp from the admin panel.');
                     const formattedNumber = String(msg.phoneNumber || '').replace(/\D/g, '');
                     const chatId = `${formattedNumber}@c.us`;
                     
@@ -279,6 +329,14 @@ wss.on('connection', (ws) => {
             }
         } catch (err) {
             console.error('WS message error:', err);
+            if (isStaleBrowserError(err)) {
+                await resetClient(err.message);
+                setTimeout(() => {
+                    initializeClient().catch((initError) => {
+                        console.error('WS reinitialize after stale browser error failed:', initError.message);
+                    });
+                }, 1000);
+            }
             ws.send(JSON.stringify({ type: 'error', message: err.message }));
         }
     });
