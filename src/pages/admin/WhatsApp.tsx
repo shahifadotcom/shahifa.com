@@ -244,10 +244,16 @@ const WhatsApp = () => {
       return;
     }
 
-    const phoneNumber = prompt('Enter phone number (with country code):');
-    if (!phoneNumber) return;
+    const rawPhone = prompt('Enter phone number with country code (e.g. +971501234567):');
+    if (!rawPhone) return;
 
-    
+    // Sanitize: keep digits only (WhatsApp expects E.164 without "+")
+    const phoneNumber = rawPhone.replace(/\D/g, '');
+    if (phoneNumber.length < 10) {
+      toast.error('Invalid phone number. Include country code and full number.');
+      return;
+    }
+
     const message = 'Test message from Shahifa Store - WhatsApp integration is working!';
 
     // Try WS first
@@ -269,8 +275,12 @@ const WhatsApp = () => {
         toast.success('Test message sent successfully');
         addLog(`Test message sent to ${phoneNumber}`);
       } else {
-        toast.error(data?.error || 'Failed to send test message');
-        addLog(`Failed to send test message: ${data?.error}`);
+        const err = String(data?.error || '');
+        const friendly = err.includes('No LID for user')
+          ? 'This phone number is not registered on WhatsApp. Check the number and try again.'
+          : (data?.error || 'Failed to send test message');
+        toast.error(friendly);
+        addLog(`Failed to send test message: ${friendly}`);
       }
     }).catch(() => {
       toast.error('Failed to contact local bridge');
