@@ -302,7 +302,7 @@ wss.on('connection', (ws) => {
                     break;
                 }
                 case 'send_message': {
-                    if (!isReady || !client) throw new Error('WhatsApp not ready');
+                    if (!(await verifyClientReady())) throw new Error('WhatsApp not ready. Please reconnect WhatsApp from the admin panel.');
                     const formattedNumber = String(msg.phoneNumber || '').replace(/\D/g, '');
                     const chatId = `${formattedNumber}@c.us`;
                     
@@ -329,6 +329,14 @@ wss.on('connection', (ws) => {
             }
         } catch (err) {
             console.error('WS message error:', err);
+            if (isStaleBrowserError(err)) {
+                await resetClient(err.message);
+                setTimeout(() => {
+                    initializeClient().catch((initError) => {
+                        console.error('WS reinitialize after stale browser error failed:', initError.message);
+                    });
+                }, 1000);
+            }
             ws.send(JSON.stringify({ type: 'error', message: err.message }));
         }
     });
