@@ -244,10 +244,16 @@ const WhatsApp = () => {
       return;
     }
 
-    const phoneNumber = prompt('Enter phone number (with country code):');
-    if (!phoneNumber) return;
+    const rawPhone = prompt('Enter phone number with country code (e.g. +971501234567):');
+    if (!rawPhone) return;
 
-    
+    // Sanitize: keep digits only (WhatsApp expects E.164 without "+")
+    const phoneNumber = rawPhone.replace(/\D/g, '');
+    if (phoneNumber.length < 10) {
+      toast.error('Invalid phone number. Include country code and full number.');
+      return;
+    }
+
     const message = 'Test message from Shahifa Store - WhatsApp integration is working!';
 
     // Try WS first
