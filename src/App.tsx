@@ -43,6 +43,8 @@ import ErrorLogger from "./components/ErrorLogger";
 import Profile from "./pages/Profile";
 import Orders from "./pages/Orders";
 import Theme from "./pages/admin/Theme";
+import Themes from "./pages/admin/Themes";
+import { ThemeProvider } from "./theme/ThemeProvider";
 import IPRanges from "./pages/admin/IPRanges";
 import Countries from "./pages/admin/Countries";
 import Notifications from "./pages/admin/Notifications";
@@ -85,6 +87,7 @@ const App = () => {
 
   return (
   <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
     <TooltipProvider>
       <AuthProvider>
         <CartProvider>
@@ -137,6 +140,7 @@ const App = () => {
               <Route path="/admin/seo" element={<SEO />} />
               <Route path="/admin/seo-dashboard" element={<SeoDashboard />} />
               <Route path="/admin/theme" element={<Theme />} />
+              <Route path="/admin/themes" element={<Themes />} />
               <Route path="/admin/countries" element={<Countries />} />
               <Route path="/admin/ip-ranges" element={<IPRanges />} />
               <Route path="/admin/notifications" element={<Notifications />} />
