@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      active_theme: {
+        Row: {
+          id: boolean
+          theme_slug: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: boolean
+          theme_slug: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: boolean
+          theme_slug?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "active_theme_theme_slug_fkey"
+            columns: ["theme_slug"]
+            isOneToOne: false
+            referencedRelation: "app_themes"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       ad_platforms: {
         Row: {
           access_token: string | null
@@ -307,6 +336,42 @@ export type Database = {
           created_at?: string
           gemini_api_key?: string | null
           id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      app_themes: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_builtin: boolean
+          name: string
+          preview_image_url: string | null
+          slug: string
+          tokens: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_builtin?: boolean
+          name: string
+          preview_image_url?: string | null
+          slug: string
+          tokens?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_builtin?: boolean
+          name?: string
+          preview_image_url?: string | null
+          slug?: string
+          tokens?: Json
           updated_at?: string
         }
         Relationships: []
@@ -3720,6 +3785,14 @@ export type Database = {
         }[]
       }
       generate_secure_otp: { Args: never; Returns: string }
+      get_active_theme: {
+        Args: never
+        Returns: {
+          name: string
+          slug: string
+          tokens: Json
+        }[]
+      }
       get_cj_credentials: {
         Args: { connection_id: string }
         Returns: {
