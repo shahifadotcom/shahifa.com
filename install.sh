@@ -143,7 +143,7 @@ if [ ! -f "$CREDS_FILE" ]; then
   LOGFLARE_PUBLIC_KEY="$(rand_hex 16)"
 
   # Mint anon + service_role JWTs using zero-dep node script
-  KEYS_OUTPUT="$(node "${PROJECT_ROOT}/scripts/generate-supabase-jwt.js" "$JWT_SECRET")"
+  KEYS_OUTPUT="$(node "${PROJECT_ROOT}/scripts/generate-supabase-jwt.cjs" "$JWT_SECRET")"
   ANON_KEY="$(echo "$KEYS_OUTPUT" | grep '^ANON_KEY=' | cut -d= -f2-)"
   SERVICE_ROLE_KEY="$(echo "$KEYS_OUTPUT" | grep '^SERVICE_ROLE_KEY=' | cut -d= -f2-)"
 
