@@ -4,8 +4,8 @@ import type { Database } from './types';
 
 // Cloud defaults (Lovable preview). On the VPS, install.sh writes overrides
 // into .env so the app talks to the self-hosted Supabase stack instead.
-const DEFAULT_SUPABASE_URL = "https://mofwljpreecqqxkilywh.supabase.co";
-const DEFAULT_SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vZndsanByZWVjcXF4a2lseXdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcxMTk5MDgsImV4cCI6MjA3MjY5NTkwOH0.1kfabhKCzV9P384_J9uWF6wGSRHDTYr_9yUBTvGDAvY";
+const DEFAULT_SUPABASE_URL = "https://shahifa.com/supabase";
+const DEFAULT_SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzgxNTQ2MzMxLCJleHAiOjIwOTY5MDYzMzF9.8e7-rZy6Bfs5U0m3e522UKMaDWeP8pjDwaVT29DPxpU";
 
 const SUPABASE_URL =
   (import.meta.env.VITE_SUPABASE_URL as string | undefined) || DEFAULT_SUPABASE_URL;
