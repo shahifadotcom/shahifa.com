@@ -11,9 +11,9 @@ import { useAuth } from "@/hooks/useAuth";
 export function AliHeader() {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
-  const { items } = useCart();
+  const { getCartItemCount } = useCart();
   const { user } = useAuth();
-  const cartCount = items.reduce((n, i) => n + (i.quantity || 1), 0);
+  const cartCount = getCartItemCount();
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
