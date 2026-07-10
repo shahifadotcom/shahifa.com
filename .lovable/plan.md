@@ -1,92 +1,68 @@
-# Self-Host Supabase on Your VPS
+# AliExpress-Style Redesign & Features
 
-Goal: one command (`./install.sh`) installs Docker, spins up the full Supabase stack on your VPS, restores your existing schema/data, and reconfigures the app to point at your VPS instead of `mofwljpreecqqxkilywh.supabase.co`.
+Building a full AliExpress clone is a large, multi-week effort. Good news: Phases 0-2 are already done (theme tokens, DB, admin switcher). This plan covers what's left, split so we can ship value each session without running out of tokens mid-feature.
 
-## What gets installed on the VPS
+## What already works
+- `app_themes` + `active_theme` tables with 3 seeded presets (Default / Red 3D / AliExpress)
+- `ThemeProvider` injects CSS vars live via realtime
+- `/admin/themes` lets you switch presets any time
 
-The official Supabase self-host Docker Compose stack:
+## Phase 3 — Visual skin (this session)
 
-| Service | Purpose | Port |
-|---|---|---|
-| `postgres` (Postgres 15) | Database with all your tables, RLS, functions | 5432 |
-| `gotrue` | Auth (signup/login/JWT) | internal |
-| `postgrest` | Auto REST API from Postgres schema | internal |
-| `realtime` | Postgres → WebSocket subscriptions | internal |
-| `storage-api` | File storage (product-images, review-images buckets) | internal |
-| `imgproxy` | On-the-fly image transforms | internal |
-| `kong` | API gateway — single entry point for all services | 8000 (HTTP), 8443 (HTTPS) |
-| `studio` | Web UI like supabase.com dashboard | 3001 |
-| `edge-runtime` | Runs your Deno edge functions | internal |
-| `meta` | Schema metadata service | internal |
+Make the site *look* like AliExpress on both desktop and mobile when the AliExpress theme is active.
 
-All services run behind Kong, so your app talks to **one URL** (`http://YOUR_VPS_IP:8000`) exactly like it talks to Supabase cloud today.
+**Desktop**
+- New sticky header: red bar, logo left, category mega-menu, giant search with camera-search icon, cart/account right
+- Category strip under header (11 icon tiles: SuperDeals, Choice, Fashion, Electronics, Home, Beauty, Toys, Auto, Sports, Tools, More)
+- Homepage sections: Flash Deals countdown carousel, Choice grid, "Big Save" banner, "For You" infinite grid
+- Product card: square image, price in red with strikethrough MSRP, orange "Choice" chip, star rating + sold count, red heart wishlist
+- PDP: image gallery + zoom, red price block, shipping/returns badges, sticky "Add to Cart" bar
 
-## What `install.sh` will do
+**Mobile (Android e-commerce app feel)**
+- Top: pill search + camera icon + message icon
+- Horizontal category rail, snap-scroll
+- 2-col product grid, compact cards
+- Fixed bottom nav: Home / Choice / Cart / Wishlist / Account
+- Floating scroll-to-top
 
-```text
-1. Detect OS (Ubuntu/Debian), update apt
-2. Install Docker + Docker Compose plugin if missing
-3. Clone official supabase/supabase repo → /opt/supabase
-4. Generate strong random secrets:
-   - POSTGRES_PASSWORD
-   - JWT_SECRET (40+ chars)
-   - ANON_KEY  (JWT signed with JWT_SECRET, role=anon)
-   - SERVICE_ROLE_KEY (JWT signed with JWT_SECRET, role=service_role)
-   - DASHBOARD_USERNAME / DASHBOARD_PASSWORD (for Studio)
-5. Write /opt/supabase/docker/.env with all secrets + SITE_URL
-6. docker compose pull && docker compose up -d
-7. Wait for postgres health-check
-8. Restore schema from ./backup.sql (already in repo root) into the new DB
-9. Create storage buckets: product-images, review-images (public)
-10. Update project .env with new VITE_SUPABASE_URL + VITE_SUPABASE_PUBLISHABLE_KEY
-11. Update src/integrations/supabase/client.ts to read from env vars
-12. Print summary: Studio URL, API URL, anon key, service-role key, DB password
-```
+Only activates when AliExpress theme is selected — Default/Red-3D themes untouched.
 
-The script is idempotent — re-running it skips already-installed pieces and only restarts containers.
+## Phase 4 — Functional features (next session)
 
-## What changes in the app code
+Prioritized so we ship the highest-impact first:
 
-**Tiny.** Only one file needs to actually move from hard-coded values to env vars:
+1. **Flash Sales** — `flash_sales` table with start/end, discounted price, stock cap, live countdown
+2. **Coupons** — store coupons + product coupons, code entry at checkout
+3. **Coins / rewards** — daily check-in, earn coins on order, redeem as discount
+4. **Choice program flag** — `products.is_choice` toggle, free-shipping badge
+5. **Reviews with photos** — extend existing reviews with image upload + helpful votes
+6. **Wishlist collections** — user-named lists (already partial)
+7. **Recently viewed + "For you" recommendations** — track views, simple co-view scoring
 
-- `src/integrations/supabase/client.ts` → read `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from `import.meta.env` instead of hard-coded constants. (Falls back to current cloud values if env vars are missing, so dev preview keeps working.)
+## Phase 5 — Mobile / PWA polish
 
-Everything else — `@supabase/supabase-js`, all queries, all edge function invocations, realtime subscriptions, storage uploads — keeps working unchanged because self-hosted Supabase exposes the identical API surface.
+- Install prompt, splash screen
+- Skeleton loaders on every list
+- Pull-to-refresh on home
+- Native share sheet on PDP
 
-## Files I'll create / change
+## Phase 6 — Not included (call out honestly)
 
-**New files:**
-- `install.sh` (root) — the one-command installer described above (~400 lines bash)
-- `scripts/generate-supabase-jwt.js` — small Node helper used by install.sh to mint anon + service_role JWTs from the generated JWT_SECRET
-- `scripts/restore-schema.sh` — helper that pipes `backup.sql` into the new Postgres container
-- `SELF_HOSTING.md` — runbook: how to run, where logs live, how to back up, how to upgrade, how to add SSL via Nginx + Let's Encrypt
-- `.env.example` — documents `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY`
+These AliExpress features are out of scope unless you specifically ask — each is a project on its own:
+- Live streaming / video shopping
+- In-app chat with sellers (real-time messaging infra)
+- Affiliate program dashboard
+- Multi-warehouse logistics tracking with map
+- AliPay-style wallet
 
-**Modified files:**
-- `src/integrations/supabase/client.ts` — read URL + anon key from env (with current cloud values as fallback)
-- `README.md` — add a "Self-host on VPS" section pointing to install.sh
+## Technical section
 
-**No database migration is needed in Lovable** — schema lives in `backup.sql` and the install script restores it into the new self-hosted Postgres on the VPS.
+- Skin lives in `src/themes/aliexpress/` — layout components (`AliHeader`, `AliCategoryStrip`, `AliProductCard`, `AliBottomNav`, `AliFlashDeals`)
+- `useActiveTheme()` selects which layout wrapper to render in `App.tsx`
+- No changes to routing, auth, cart, orders, or checkout logic — pure presentation swap
+- Mobile detection via existing `useIsMobile()` hook
+- All tokens read from the DB `app_themes` row so admins can still tweak colors
 
-## After you run install.sh on your VPS
+## Deliverables this session
 
-1. Open `http://YOUR_VPS_IP:3001` → Supabase Studio (manage DB, run SQL, see logs) using the username/password the script prints
-2. Open `http://YOUR_VPS_IP:8000` → the API endpoint your app talks to
-3. Update your app's production `.env`:
-   ```
-   VITE_SUPABASE_URL=http://YOUR_VPS_IP:8000
-   VITE_SUPABASE_PUBLISHABLE_KEY=<anon key printed by install.sh>
-   ```
-4. Rebuild + restart the frontend (`npm run build && pm2 restart shahifa-ecommerce`)
-5. Optional: point a domain at the VPS, run `certbot` to get SSL, change `VITE_SUPABASE_URL` to `https://api.yourdomain.com`
-
-## Important caveats (please read)
-
-- **Lovable preview keeps using the cloud Supabase** (`mofwljpreecqqxkilywh.supabase.co`). The self-hosted stack is for your VPS production deploy only. The fallback in `client.ts` ensures the Lovable editor preview keeps working while your VPS runs against the local DB.
-- **Your existing cloud edge functions are NOT auto-copied.** They live in `supabase/functions/*` in this repo. The install script mounts that directory into the self-hosted `edge-runtime` container so they all run on your VPS too. Any secrets the functions need (GEMINI_API_KEY, CJ_ACCESS_TOKEN, WHATSAPP_BRIDGE_URL, etc.) must be added to `/opt/supabase/docker/.env` — install.sh will print a list of secret names to copy over from your Lovable secrets.
-- **Realtime, Storage, RLS all work identically** — same API, same client library, no code changes.
-- **Backups**: install.sh sets up a daily `pg_dump` cron to `/opt/supabase/backups/`.
-- **Resource needs**: ~2 GB RAM minimum, 4 GB recommended. The full stack is heavier than just Postgres.
-- **`backup.sql` in your repo root** — I'll use this as the schema source. If it's stale, run a fresh dump from the Lovable Supabase dashboard first and replace `backup.sql` before running install.sh on the VPS.
-
-Approve and I'll build it.
+Just Phase 3. At the end, activating the AliExpress theme from `/admin/themes` will visually transform desktop and mobile. Phases 4-6 wait until you say "continue theme work".
