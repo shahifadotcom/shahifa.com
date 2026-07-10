@@ -76,6 +76,7 @@ import BlogPost from "./pages/BlogPost";
 import SocialLinks from "./pages/admin/SocialLinks";
 import SearchResults from "./pages/SearchResults";
 import ReturnsRefunds from "./pages/ReturnsRefunds";
+import { InstallPrompt } from "./components/InstallPrompt";
 
 const queryClient = new QueryClient();
 
