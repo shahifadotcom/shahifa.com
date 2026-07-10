@@ -10,8 +10,11 @@ import ProductCard from '@/components/ProductCard';
 import ProductDetailModal from '@/components/ProductDetailModal';
 import { Loader2, SearchX } from 'lucide-react';
 import { usePageHead } from '@/hooks/usePageHead';
+import { useIsAliTheme } from '@/themes/aliexpress/useIsAliTheme';
+import { AliSearchResults } from '@/themes/aliexpress/AliSearchResults';
 
 const SearchResults = () => {
+  const isAli = useIsAliTheme();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
   usePageHead({
@@ -60,6 +63,10 @@ const SearchResults = () => {
     setSelectedProduct(product);
     setIsModalOpen(true);
   };
+
+  if (isAli) {
+    return <AliSearchResults products={products} loading={loading} query={searchQuery} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

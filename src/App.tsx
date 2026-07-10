@@ -76,6 +76,7 @@ import BlogPost from "./pages/BlogPost";
 import SocialLinks from "./pages/admin/SocialLinks";
 import SearchResults from "./pages/SearchResults";
 import ReturnsRefunds from "./pages/ReturnsRefunds";
+import { InstallPrompt } from "./components/InstallPrompt";
 
 const queryClient = new QueryClient();
 
@@ -183,6 +184,7 @@ const App = () => {
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <InstallPrompt />
           </BrowserRouter>
         </CartProvider>
       </AuthProvider>

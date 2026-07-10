@@ -15,8 +15,11 @@ import MobileBottomNav from '@/components/MobileBottomNav';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, ShoppingCart, Heart, ArrowLeft } from 'lucide-react';
+import { useIsAliTheme } from '@/themes/aliexpress/useIsAliTheme';
+import { AliProductDetail } from '@/themes/aliexpress/AliProductDetail';
 
 const ProductDetail = () => {
+  const isAli = useIsAliTheme();
   const { slug, countryCode } = useParams<{ slug: string; countryCode?: string }>();
   const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
@@ -140,6 +143,10 @@ const ProductDetail = () => {
     addToCart(product);
     navigate('/checkout');
   };
+
+  if (isAli) {
+    return <AliProductDetail product={product} virtualTrialEnabled={virtualTrialEnabled} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col max-w-full overflow-x-hidden">

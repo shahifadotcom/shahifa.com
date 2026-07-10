@@ -5,6 +5,7 @@ import { AliProductCard } from "./AliProductCard";
 import { AliBottomNav } from "./AliBottomNav";
 import ImageSlider from "@/components/ImageSlider";
 import Footer from "@/components/Footer";
+import { CoinsWidget } from "@/components/CoinsWidget";
 import { Product } from "@/lib/types";
 import { useMemo } from "react";
 
@@ -28,10 +29,16 @@ export function AliHome({ products, topDeals, loading }: Props) {
       <AliHeader />
       <AliCategoryStrip />
 
-      <div className="container mx-auto px-2 md:px-4 py-3">
+      <div className="container mx-auto px-2 md:px-4 py-3 grid gap-3 md:grid-cols-[1fr_320px]">
         <div className="rounded-lg overflow-hidden shadow-sm">
           <ImageSlider />
         </div>
+        <div className="hidden md:block">
+          <CoinsWidget />
+        </div>
+      </div>
+      <div className="md:hidden container mx-auto px-2 pb-3">
+        <CoinsWidget />
       </div>
 
       <AliFlashDeals products={topDeals} />

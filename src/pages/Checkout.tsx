@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useCoupons } from '@/hooks/useCoupons';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, ArrowLeft, CheckCircle } from 'lucide-react';
 import PhoneInput from 'react-phone-number-input';
@@ -64,7 +65,10 @@ const Checkout = () => {
   }, [selectedCountry]);
 
   const subtotal = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const total = subtotal; // Shipping is always free for COD
+  const { applied: coupon, apply: applyCoupon, discountFor, error: couponError, clear: clearCoupon } = useCoupons();
+  const [couponCode, setCouponCode] = useState('');
+  const couponDiscount = discountFor(subtotal);
+  const total = Math.max(0, subtotal - couponDiscount);
 
   const handleOTPVerified = async (phoneNumber: string, otpCode: string) => {
     setShowOTPModal(false);
@@ -383,6 +387,45 @@ const Checkout = () => {
                     <span>Delivery Charge</span>
                     <span>FREE</span>
                   </div>
+
+                  {/* Coupon */}
+                  <div className="pt-2">
+                    {coupon ? (
+                      <div className="flex justify-between items-center text-sm bg-green-50 border border-green-200 rounded px-2 py-1.5">
+                        <span className="text-green-700">
+                          Coupon <b>{coupon.code}</b> applied
+                        </span>
+                        <button onClick={clearCoupon} className="text-xs text-red-500 hover:underline">Remove</button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Promo code"
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value)}
+                          className="h-9 text-sm"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => applyCoupon(couponCode, subtotal)}
+                          disabled={!couponCode.trim()}
+                        >
+                          Apply
+                        </Button>
+                      </div>
+                    )}
+                    {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
+                  </div>
+
+                  {couponDiscount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Coupon discount</span>
+                      <span>-{couponDiscount.toFixed(2)} {currency}</span>
+                    </div>
+                  )}
+
                   <Separator />
                   <div className="flex justify-between font-semibold">
                     <span>Total</span>
