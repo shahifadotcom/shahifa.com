@@ -42,8 +42,13 @@ function applyBodyClass(slug: string) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [active, setActive] = useState<ActiveTheme>(null);
+  const [active, setActive] = useState<ActiveTheme>({ slug: "aliexpress", name: "AliExpress", tokens: {} });
   const [loading, setLoading] = useState(true);
+
+  // Apply AliExpress body class immediately so the skin renders before DB load.
+  useEffect(() => {
+    applyBodyClass("aliexpress");
+  }, []);
 
   const load = async () => {
     try {
@@ -57,7 +62,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         applyBodyClass(t.slug);
       }
     } catch (e) {
-      console.warn("[theme] failed to load active theme", e);
+      console.warn("[theme] failed to load active theme, keeping AliExpress default", e);
     } finally {
       setLoading(false);
     }
