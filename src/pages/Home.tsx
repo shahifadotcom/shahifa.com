@@ -17,8 +17,11 @@ import { CountryService } from "@/services/countryService";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { useIsAliTheme } from "@/themes/aliexpress/useIsAliTheme";
+import { AliHome } from "@/themes/aliexpress/AliHome";
 
 const Home = () => {
+  const isAli = useIsAliTheme();
   const { 
     selectedCountry, 
     allCountries, 
@@ -116,6 +119,10 @@ const Home = () => {
         </div>
       </div>
     );
+  }
+
+  if (isAli) {
+    return <AliHome products={products} topDeals={topDeals} loading={productsLoading} />;
   }
 
   return (
