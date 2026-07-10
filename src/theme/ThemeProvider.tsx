@@ -19,6 +19,7 @@ const ThemeContext = createContext<ThemeContextValue>({
 });
 
 const STYLE_ID = "app-theme-vars";
+const THEME_CLASSES = ["theme-default", "theme-red-3d", "theme-aliexpress"];
 
 function applyTokens(tokens: ThemeTokens) {
   let style = document.getElementById(STYLE_ID) as HTMLStyleElement | null;
@@ -31,6 +32,13 @@ function applyTokens(tokens: ThemeTokens) {
     .map(([k, v]) => `${k}: ${v};`)
     .join("\n  ");
   style.innerHTML = `:root {\n  ${body}\n}`;
+}
+
+function applyBodyClass(slug: string) {
+  if (typeof document === "undefined") return;
+  document.body.classList.remove(...THEME_CLASSES);
+  const cls = `theme-${slug}`;
+  document.body.classList.add(cls);
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
