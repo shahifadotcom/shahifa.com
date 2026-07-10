@@ -64,7 +64,10 @@ const Checkout = () => {
   }, [selectedCountry]);
 
   const subtotal = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const total = subtotal; // Shipping is always free for COD
+  const { applied: coupon, apply: applyCoupon, discountFor, error: couponError, clear: clearCoupon } = useCoupons();
+  const [couponCode, setCouponCode] = useState('');
+  const couponDiscount = discountFor(subtotal);
+  const total = Math.max(0, subtotal - couponDiscount);
 
   const handleOTPVerified = async (phoneNumber: string, otpCode: string) => {
     setShowOTPModal(false);
