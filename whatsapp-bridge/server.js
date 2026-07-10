@@ -6,6 +6,7 @@ require('dotenv').config();
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const axios = require('axios');
+const { humanSend, recordFailure, metrics: antiBanMetrics } = require('./humanBehavior');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -183,43 +184,52 @@ app.post('/send-message', async (req, res) => {
     try {
         // Format phone number (remove any non-digits and add country code if needed)
         const formattedNumber = phoneNumber.replace(/\D/g, '');
+        if (formattedNumber.length < 8 || formattedNumber.length > 15) {
+            return res.status(400).json({ success: false, error: 'Invalid phone number length' });
+        }
         const chatId = `${formattedNumber}@c.us`;
 
         // Send message with media if mediaUrl is provided
         if (mediaUrl) {
             console.log(`Downloading image from: ${mediaUrl}`);
-            
-            // Download the image
-            const response = await axios.get(mediaUrl, { responseType: 'arraybuffer' });
+            const response = await axios.get(mediaUrl, { responseType: 'arraybuffer', maxContentLength: 10 * 1024 * 1024 });
             const buffer = Buffer.from(response.data);
             const mimeType = response.headers['content-type'] || 'image/jpeg';
-            
-            // Get filename from URL or generate one
             const urlParts = mediaUrl.split('/');
             const filename = urlParts[urlParts.length - 1] || 'image.jpg';
-            
-            // Create MessageMedia object
-            const media = new MessageMedia(
-                mimeType,
-                buffer.toString('base64'),
-                filename
-            );
-            
-            console.log(`Sending image with caption: ${message}`);
-            await client.sendMessage(chatId, media, { caption: message });
-            console.log('Image sent successfully');
+            const media = new MessageMedia(mimeType, buffer.toString('base64'), filename);
+
+            console.log(`Sending image with caption via humanSend`);
+            await humanSend(client, chatId, media, { caption: message });
         } else {
-            // Send text message only
-            await client.sendMessage(chatId, message);
+            await humanSend(client, chatId, message);
         }
-        
+
         res.json({
             success: true,
             messageId: `msg_${Date.now()}`,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            metrics: antiBanMetrics()
         });
     } catch (error) {
         console.error('Send message error:', error);
+
+        // Anti-ban policy rejections — return 429 so caller can back off
+        if (error.code && ['DAILY_CAP','HOURLY_CAP','MINUTE_CAP','RECIPIENT_COOLDOWN','BACKOFF'].includes(error.code)) {
+            return res.status(429).json({
+                success: false,
+                error: error.message,
+                code: error.code,
+                retryAfterMs: error.retryAfterMs || null,
+                metrics: antiBanMetrics()
+            });
+        }
+        if (error.code === 'NOT_ON_WHATSAPP') {
+            return res.status(400).json({ success: false, error: error.message, code: error.code });
+        }
+
+        recordFailure();
+
         if (isStaleBrowserError(error)) {
             await resetClient(error.message);
             setTimeout(() => {
@@ -239,6 +249,11 @@ app.post('/send-message', async (req, res) => {
             error: error.message
         });
     }
+});
+
+// Anti-ban metrics endpoint
+app.get('/metrics', (req, res) => {
+    res.json({ isReady, ...antiBanMetrics() });
 });
 
 app.post('/disconnect', async (req, res) => {
@@ -304,22 +319,26 @@ wss.on('connection', (ws) => {
                 case 'send_message': {
                     if (!(await verifyClientReady())) throw new Error('WhatsApp not ready. Please reconnect WhatsApp from the admin panel.');
                     const formattedNumber = String(msg.phoneNumber || '').replace(/\D/g, '');
+                    if (formattedNumber.length < 8 || formattedNumber.length > 15) throw new Error('Invalid phone number length');
                     const chatId = `${formattedNumber}@c.us`;
-                    
-                    // Handle media messages via WebSocket
+
                     if (msg.mediaUrl) {
-                        const response = await axios.get(msg.mediaUrl, { responseType: 'arraybuffer' });
+                        const response = await axios.get(msg.mediaUrl, { responseType: 'arraybuffer', maxContentLength: 10 * 1024 * 1024 });
                         const buffer = Buffer.from(response.data);
                         const mimeType = response.headers['content-type'] || 'image/jpeg';
                         const urlParts = msg.mediaUrl.split('/');
                         const filename = urlParts[urlParts.length - 1] || 'image.jpg';
                         const media = new MessageMedia(mimeType, buffer.toString('base64'), filename);
-                        await client.sendMessage(chatId, media, { caption: msg.text || msg.message || '' });
+                        await humanSend(client, chatId, media, { caption: msg.text || msg.message || '' });
                     } else {
-                        await client.sendMessage(chatId, msg.text || msg.message || '');
+                        await humanSend(client, chatId, msg.text || msg.message || '');
                     }
-                    
-                    ws.send(JSON.stringify({ type: 'message_sent', phoneNumber: formattedNumber }));
+
+                    ws.send(JSON.stringify({ type: 'message_sent', phoneNumber: formattedNumber, metrics: antiBanMetrics() }));
+                    break;
+                }
+                case 'metrics': {
+                    ws.send(JSON.stringify({ type: 'metrics', isReady, ...antiBanMetrics() }));
                     break;
                 }
                 case 'status':
@@ -329,6 +348,7 @@ wss.on('connection', (ws) => {
             }
         } catch (err) {
             console.error('WS message error:', err);
+            const policyCodes = ['DAILY_CAP','HOURLY_CAP','MINUTE_CAP','RECIPIENT_COOLDOWN','BACKOFF','NOT_ON_WHATSAPP'];
             if (isStaleBrowserError(err)) {
                 await resetClient(err.message);
                 setTimeout(() => {
@@ -336,8 +356,11 @@ wss.on('connection', (ws) => {
                         console.error('WS reinitialize after stale browser error failed:', initError.message);
                     });
                 }, 1000);
+                recordFailure();
+            } else if (!policyCodes.includes(err.code)) {
+                recordFailure();
             }
-            ws.send(JSON.stringify({ type: 'error', message: err.message }));
+            ws.send(JSON.stringify({ type: 'error', message: err.message, code: err.code || null, retryAfterMs: err.retryAfterMs || null }));
         }
     });
 
