@@ -348,6 +348,7 @@ wss.on('connection', (ws) => {
             }
         } catch (err) {
             console.error('WS message error:', err);
+            const policyCodes = ['DAILY_CAP','HOURLY_CAP','MINUTE_CAP','RECIPIENT_COOLDOWN','BACKOFF','NOT_ON_WHATSAPP'];
             if (isStaleBrowserError(err)) {
                 await resetClient(err.message);
                 setTimeout(() => {
@@ -355,8 +356,11 @@ wss.on('connection', (ws) => {
                         console.error('WS reinitialize after stale browser error failed:', initError.message);
                     });
                 }, 1000);
+                recordFailure();
+            } else if (!policyCodes.includes(err.code)) {
+                recordFailure();
             }
-            ws.send(JSON.stringify({ type: 'error', message: err.message }));
+            ws.send(JSON.stringify({ type: 'error', message: err.message, code: err.code || null, retryAfterMs: err.retryAfterMs || null }));
         }
     });
 
