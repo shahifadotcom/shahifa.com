@@ -227,3 +227,32 @@
     }
   }
 }
+
+/* ============================================
+   AliExpress Theme — scoped visual overrides
+   Active only when <body class="theme-aliexpress">
+   ============================================ */
+body.theme-aliexpress {
+  --ali-red: 0 85% 50%;
+  --ali-orange: 30 100% 55%;
+  --ali-yellow: 45 100% 55%;
+  background: #f5f5f5;
+}
+body.theme-aliexpress .ali-card {
+  will-change: transform;
+}
+body.theme-aliexpress .ali-cat-strip .scrollbar-thin::-webkit-scrollbar {
+  display: none;
+}
+body.theme-aliexpress .ali-flash {
+  background-size: 200% 100%;
+  animation: ali-flash-shine 8s linear infinite;
+}
+@keyframes ali-flash-shine {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+/* AliExpress bottom-nav lift for mobile safe area */
+body.theme-aliexpress .ali-bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom);
+}
