@@ -63,7 +63,15 @@ export const useCountryDetection = () => {
           countryToSet = countries.find(c => c.code.toLowerCase() === countryCode.toLowerCase()) || null;
         }
 
-        // Priority 2: Saved country preference
+        // Priority 2: Cookie preference (survives across subdomains/sessions)
+        if (!countryToSet) {
+          const cookieCode = readCookie(COUNTRY_COOKIE);
+          if (cookieCode) {
+            countryToSet = countries.find(c => c.code === cookieCode) || null;
+          }
+        }
+
+        // Priority 3: Saved localStorage preference
         if (!countryToSet) {
           const savedCountryCode = localStorage.getItem('selectedCountry');
           if (savedCountryCode) {
@@ -71,7 +79,7 @@ export const useCountryDetection = () => {
           }
         }
 
-        // Priority 3: Always auto-detect via IP in the background (no modal)
+        // Priority 4: Auto-detect via IP in the background (no modal)
         if (!countryToSet) {
           try {
             const detected = await CountryService.detectCountryByIP();
@@ -91,8 +99,9 @@ export const useCountryDetection = () => {
 
         if (countryToSet) {
           setSelectedCountry(countryToSet);
-          // Persist so subsequent visits skip detection
+          // Persist to both cookie and localStorage
           try { localStorage.setItem('selectedCountry', countryToSet.code); } catch {}
+          try { writeCookie(COUNTRY_COOKIE, countryToSet.code); } catch {}
         }
         // Never prompt the user to select a country
         setNeedsSelection(false);
@@ -112,12 +121,13 @@ export const useCountryDetection = () => {
   const selectCountry = (country: Country | null) => {
     setSelectedCountry(country);
     setNeedsSelection(false);
-    
-    // Save preference to localStorage
+
     if (country) {
       localStorage.setItem('selectedCountry', country.code);
+      writeCookie(COUNTRY_COOKIE, country.code);
     } else {
       localStorage.removeItem('selectedCountry');
+      clearCookie(COUNTRY_COOKIE);
     }
   };
 
