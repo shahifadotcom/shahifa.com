@@ -121,6 +121,10 @@ const Home = () => {
     );
   }
 
+  if (isAli) {
+    return <AliHome products={products} topDeals={topDeals} loading={productsLoading} />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
