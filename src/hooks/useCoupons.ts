@@ -21,22 +21,23 @@ export function useCoupons() {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: err } = await supabase
+      const { data, error: err } = await (supabase as any)
         .from("coupons")
         .select("*")
         .ilike("code", code.trim())
         .eq("active", true)
         .maybeSingle();
       if (err) throw err;
-      if (!data) { setError("Invalid coupon code"); setApplied(null); return null; }
-      if (data.expires_at && new Date(data.expires_at) < new Date()) {
+      const row = data as Coupon | null;
+      if (!row) { setError("Invalid coupon code"); setApplied(null); return null; }
+      if (row.expires_at && new Date(row.expires_at) < new Date()) {
         setError("Coupon expired"); setApplied(null); return null;
       }
-      if (data.min_order && subtotal < data.min_order) {
-        setError(`Minimum order ${data.min_order} required`); setApplied(null); return null;
+      if (row.min_order && subtotal < row.min_order) {
+        setError(`Minimum order ${row.min_order} required`); setApplied(null); return null;
       }
-      setApplied(data as Coupon);
-      return data as Coupon;
+      setApplied(row);
+      return row;
     } catch (e: any) {
       setError(e.message || "Failed to apply coupon");
       return null;
@@ -64,7 +65,7 @@ export function useCoins() {
 
   const refresh = useCallback(async () => {
     if (!user) { setLoading(false); return; }
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("user_coins")
       .select("balance, last_checkin")
       .eq("user_id", user.id)
@@ -83,13 +84,13 @@ export function useCoins() {
     if (!user || claimedToday) return null;
     const today = new Date().toISOString().slice(0, 10);
     const reward = 5;
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("user_coins")
       .select("balance")
       .eq("user_id", user.id)
       .maybeSingle();
-    const newBal = (data?.balance || 0) + reward;
-    await supabase.from("user_coins").upsert({
+    const newBal = ((data?.balance as number) || 0) + reward;
+    await (supabase as any).from("user_coins").upsert({
       user_id: user.id,
       balance: newBal,
       last_checkin: today,
@@ -119,12 +120,12 @@ export function useFlashSales() {
   useEffect(() => {
     const load = async () => {
       const now = new Date().toISOString();
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("flash_sales")
         .select("*")
         .lte("starts_at", now)
         .gte("ends_at", now);
-      setSales((data as FlashSale[]) || []);
+      setSales(((data as unknown) as FlashSale[]) || []);
       setLoading(false);
     };
     load();
