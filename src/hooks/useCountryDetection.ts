@@ -3,6 +3,26 @@ import { CountryService, Country } from '@/services/countryService';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
+const COUNTRY_COOKIE = 'selectedCountry';
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+
+const readCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'));
+  return match ? decodeURIComponent(match[1]) : null;
+};
+
+const writeCookie = (name: string, value: string) => {
+  if (typeof document === 'undefined') return;
+  const secure = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${COOKIE_MAX_AGE}; Path=/; SameSite=Lax${secure}`;
+};
+
+const clearCookie = (name: string) => {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${name}=; Max-Age=0; Path=/`;
+};
+
 export const useCountryDetection = () => {
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [allCountries, setAllCountries] = useState<Country[]>([]);
@@ -43,7 +63,15 @@ export const useCountryDetection = () => {
           countryToSet = countries.find(c => c.code.toLowerCase() === countryCode.toLowerCase()) || null;
         }
 
-        // Priority 2: Saved country preference
+        // Priority 2: Cookie preference (survives across subdomains/sessions)
+        if (!countryToSet) {
+          const cookieCode = readCookie(COUNTRY_COOKIE);
+          if (cookieCode) {
+            countryToSet = countries.find(c => c.code === cookieCode) || null;
+          }
+        }
+
+        // Priority 3: Saved localStorage preference
         if (!countryToSet) {
           const savedCountryCode = localStorage.getItem('selectedCountry');
           if (savedCountryCode) {
@@ -51,7 +79,7 @@ export const useCountryDetection = () => {
           }
         }
 
-        // Priority 3: Always auto-detect via IP in the background (no modal)
+        // Priority 4: Auto-detect via IP in the background (no modal)
         if (!countryToSet) {
           try {
             const detected = await CountryService.detectCountryByIP();
@@ -71,8 +99,9 @@ export const useCountryDetection = () => {
 
         if (countryToSet) {
           setSelectedCountry(countryToSet);
-          // Persist so subsequent visits skip detection
+          // Persist to both cookie and localStorage
           try { localStorage.setItem('selectedCountry', countryToSet.code); } catch {}
+          try { writeCookie(COUNTRY_COOKIE, countryToSet.code); } catch {}
         }
         // Never prompt the user to select a country
         setNeedsSelection(false);
@@ -92,12 +121,13 @@ export const useCountryDetection = () => {
   const selectCountry = (country: Country | null) => {
     setSelectedCountry(country);
     setNeedsSelection(false);
-    
-    // Save preference to localStorage
+
     if (country) {
       localStorage.setItem('selectedCountry', country.code);
+      writeCookie(COUNTRY_COOKIE, country.code);
     } else {
       localStorage.removeItem('selectedCountry');
+      clearCookie(COUNTRY_COOKIE);
     }
   };
 
