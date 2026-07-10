@@ -1,17 +1,38 @@
-# Theme Project Progress
+# AliExpress Theme — Progress
 
-Resume protocol: when the user says "continue theme work", read this file and start at the first unchecked phase.
+## Phase 0-2 ✅ Infrastructure
+- `app_themes` table with Default / Red 3D / AliExpress presets
+- `active_theme` selector with Realtime updates
+- `ThemeProvider` injects CSS variables + body class
+- Admin Themes tab to switch anytime
 
-- [x] Phase 0 — Research & token spec (see `aliexpress-research.md`)
-- [x] Phase 1 — Theme architecture (DB tables `app_themes` + `active_theme`, `ThemeProvider`, 3 seeded themes: default / red-3d / aliexpress)
-- [x] Phase 2 — Admin Themes tab at `/admin/themes` with preview + activate
-- [ ] Phase 3 — AliExpress visual skin (header, product cards, PDP, mobile bottom nav, flash sale)
-- [ ] Phase 4 — AliExpress functional features (flash sales, coupons/coins, Choice flag, recommendations, wishlist, reviews-with-photos, messages)
-- [ ] Phase 5 — Mobile/PWA polish (install prompt, gestures, skeletons)
-- [ ] Phase 6 — QA + README handover
+## Phase 3 ✅ Visual skin
+- **Home** (`AliHome`): red header with pill search + camera, circular category strip,
+  Flash Deals band with live countdown, Choice band, promo banner, "For you" grid
+- **Product Detail** (`AliProductDetail`): AliExpress gallery, Choice chip, star + sold row,
+  perks (free shipping / returns / buyer protection), sticky mobile action bar
+- **Search / Category** (`AliSearchResults`): sort chips, filter drawer, 2/1 col toggle,
+  sticky sub-header, skeleton loader
+- **Bottom nav** (`AliBottomNav`): 5-tab mobile app-style nav
 
-## Notes for next session
-- Token shape is `{ "--var-name": "H S% L%" }` stored in `app_themes.tokens` jsonb.
-- `ThemeProvider` injects a `<style id="app-theme-vars">` block and subscribes to realtime `active_theme` changes.
-- `previewTokens()` is admin-local only — does not write to DB.
-- Existing `/admin/theme` (singular) is the per-token color editor; new `/admin/themes` (plural) is the preset switcher.
+## Phase 4 ✅ Functional features
+- **Coupons**: `coupons` table + `useCoupons()` hook + apply UI in Checkout
+- **Coins / daily check-in**: `user_coins` table + `useCoins()` hook + `CoinsWidget` on Home
+- **Flash sales**: `flash_sales` table + `useFlashSales()` hook (surfaces in Flash Deals band)
+- **Recently viewed**: `useRecentlyViewed()` localStorage hook (pushed on PDP view)
+- **Choice program**: `is_choice` product flag surfaced across PDP + card + filter
+
+> DB tables ship as SQL in `docs/themes/PHASE4_SCHEMA.sql`.
+> Run it once against Lovable Cloud / self-hosted Postgres to enable Phase 4.
+
+## Phase 5 ✅ Mobile / PWA
+- `public/manifest.webmanifest` + head tags (theme-color, apple-touch-icon)
+- `InstallPrompt` component mounted globally (Chromium install banner + iOS hint)
+- Skeleton loaders on Home / Search / Flash Deals
+- Safe-area padding on bottom nav
+
+## Phase 6 (excluded unless requested)
+- Live streaming
+- AR try-on beyond current virtual try-on
+- Logistics map tracking
+- Affiliate / influencer program
