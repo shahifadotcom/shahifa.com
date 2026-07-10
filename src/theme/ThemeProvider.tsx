@@ -54,6 +54,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         const t = { slug: row.slug, name: row.name, tokens: row.tokens as ThemeTokens };
         setActive(t);
         applyTokens(t.tokens);
+        applyBodyClass(t.slug);
       }
     } catch (e) {
       console.warn("[theme] failed to load active theme", e);
