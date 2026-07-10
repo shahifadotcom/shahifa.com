@@ -184,43 +184,52 @@ app.post('/send-message', async (req, res) => {
     try {
         // Format phone number (remove any non-digits and add country code if needed)
         const formattedNumber = phoneNumber.replace(/\D/g, '');
+        if (formattedNumber.length < 8 || formattedNumber.length > 15) {
+            return res.status(400).json({ success: false, error: 'Invalid phone number length' });
+        }
         const chatId = `${formattedNumber}@c.us`;
 
         // Send message with media if mediaUrl is provided
         if (mediaUrl) {
             console.log(`Downloading image from: ${mediaUrl}`);
-            
-            // Download the image
-            const response = await axios.get(mediaUrl, { responseType: 'arraybuffer' });
+            const response = await axios.get(mediaUrl, { responseType: 'arraybuffer', maxContentLength: 10 * 1024 * 1024 });
             const buffer = Buffer.from(response.data);
             const mimeType = response.headers['content-type'] || 'image/jpeg';
-            
-            // Get filename from URL or generate one
             const urlParts = mediaUrl.split('/');
             const filename = urlParts[urlParts.length - 1] || 'image.jpg';
-            
-            // Create MessageMedia object
-            const media = new MessageMedia(
-                mimeType,
-                buffer.toString('base64'),
-                filename
-            );
-            
-            console.log(`Sending image with caption: ${message}`);
-            await client.sendMessage(chatId, media, { caption: message });
-            console.log('Image sent successfully');
+            const media = new MessageMedia(mimeType, buffer.toString('base64'), filename);
+
+            console.log(`Sending image with caption via humanSend`);
+            await humanSend(client, chatId, media, { caption: message });
         } else {
-            // Send text message only
-            await client.sendMessage(chatId, message);
+            await humanSend(client, chatId, message);
         }
-        
+
         res.json({
             success: true,
             messageId: `msg_${Date.now()}`,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            metrics: antiBanMetrics()
         });
     } catch (error) {
         console.error('Send message error:', error);
+
+        // Anti-ban policy rejections — return 429 so caller can back off
+        if (error.code && ['DAILY_CAP','HOURLY_CAP','MINUTE_CAP','RECIPIENT_COOLDOWN','BACKOFF'].includes(error.code)) {
+            return res.status(429).json({
+                success: false,
+                error: error.message,
+                code: error.code,
+                retryAfterMs: error.retryAfterMs || null,
+                metrics: antiBanMetrics()
+            });
+        }
+        if (error.code === 'NOT_ON_WHATSAPP') {
+            return res.status(400).json({ success: false, error: error.message, code: error.code });
+        }
+
+        recordFailure();
+
         if (isStaleBrowserError(error)) {
             await resetClient(error.message);
             setTimeout(() => {
@@ -240,6 +249,11 @@ app.post('/send-message', async (req, res) => {
             error: error.message
         });
     }
+});
+
+// Anti-ban metrics endpoint
+app.get('/metrics', (req, res) => {
+    res.json({ isReady, ...antiBanMetrics() });
 });
 
 app.post('/disconnect', async (req, res) => {
