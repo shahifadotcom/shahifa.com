@@ -51,8 +51,8 @@ export const useCountryDetection = () => {
           }
         }
 
-        // Priority 3: If selection is disabled, auto-detect via IP
-        if (!countryToSet && !selectionEnabled) {
+        // Priority 3: Always auto-detect via IP in the background (no modal)
+        if (!countryToSet) {
           try {
             const detected = await CountryService.detectCountryByIP();
             if (detected) {
@@ -71,13 +71,11 @@ export const useCountryDetection = () => {
 
         if (countryToSet) {
           setSelectedCountry(countryToSet);
-          setNeedsSelection(false);
-        } else if (selectionEnabled) {
-          // No country resolved AND selection is enabled → show modal
-          setNeedsSelection(true);
-        } else {
-          setNeedsSelection(false);
+          // Persist so subsequent visits skip detection
+          try { localStorage.setItem('selectedCountry', countryToSet.code); } catch {}
         }
+        // Never prompt the user to select a country
+        setNeedsSelection(false);
 
       } catch (err) {
         console.error('Country initialization failed:', err);
