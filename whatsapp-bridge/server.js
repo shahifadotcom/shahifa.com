@@ -6,6 +6,7 @@ require('dotenv').config();
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const axios = require('axios');
+const { humanSend, recordFailure, metrics: antiBanMetrics } = require('./humanBehavior');
 
 const app = express();
 const port = process.env.PORT || 3001;
