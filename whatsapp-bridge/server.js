@@ -319,22 +319,26 @@ wss.on('connection', (ws) => {
                 case 'send_message': {
                     if (!(await verifyClientReady())) throw new Error('WhatsApp not ready. Please reconnect WhatsApp from the admin panel.');
                     const formattedNumber = String(msg.phoneNumber || '').replace(/\D/g, '');
+                    if (formattedNumber.length < 8 || formattedNumber.length > 15) throw new Error('Invalid phone number length');
                     const chatId = `${formattedNumber}@c.us`;
-                    
-                    // Handle media messages via WebSocket
+
                     if (msg.mediaUrl) {
-                        const response = await axios.get(msg.mediaUrl, { responseType: 'arraybuffer' });
+                        const response = await axios.get(msg.mediaUrl, { responseType: 'arraybuffer', maxContentLength: 10 * 1024 * 1024 });
                         const buffer = Buffer.from(response.data);
                         const mimeType = response.headers['content-type'] || 'image/jpeg';
                         const urlParts = msg.mediaUrl.split('/');
                         const filename = urlParts[urlParts.length - 1] || 'image.jpg';
                         const media = new MessageMedia(mimeType, buffer.toString('base64'), filename);
-                        await client.sendMessage(chatId, media, { caption: msg.text || msg.message || '' });
+                        await humanSend(client, chatId, media, { caption: msg.text || msg.message || '' });
                     } else {
-                        await client.sendMessage(chatId, msg.text || msg.message || '');
+                        await humanSend(client, chatId, msg.text || msg.message || '');
                     }
-                    
-                    ws.send(JSON.stringify({ type: 'message_sent', phoneNumber: formattedNumber }));
+
+                    ws.send(JSON.stringify({ type: 'message_sent', phoneNumber: formattedNumber, metrics: antiBanMetrics() }));
+                    break;
+                }
+                case 'metrics': {
+                    ws.send(JSON.stringify({ type: 'metrics', isReady, ...antiBanMetrics() }));
                     break;
                 }
                 case 'status':
